@@ -20,6 +20,9 @@ pixel_size_micron = 6.45
 pixel_number = np.array([966, 1296])
 pixel_size_arcsec = 10.6
 
+data_base_dir = '/Volumes/HEROES_DATA/'
+data_sas_dir = data_base_dir + 'SAS-1'
+
 fits_files_dir = "/Users/schriste/Desktop/Sun_Test_Images/Sun_test_images/disk2/"
 
 class MountainTimeZone(datetime.tzinfo):
@@ -40,8 +43,7 @@ class ras:
         self.preamp_gain = float(self.header.get('GAIN_PRE'))
         self.analog_gain = float(self.header.get('GAIN_ANA'))
         # the following time is in UTC
-        self.date = datetime.datetime.fromtimestamp(self.header.get('RT_SEC') + self.header.get('RT_NSEC')/1e9)
-        #self.date = self.date.replace(tzinfo = MountainTimeZone())
+        self.date = get_header_time(self.header)[0]
 
     def peek(self, log = True, save = False):
         fig = plt.figure()
@@ -68,31 +70,31 @@ class pyas:
         self.data = fits[1].data
         self.offset = np.array([0,0])
         self.title = self.header.get('TELESCOP') + ' ' + self.header.get('INSTRUME') + ' ' + self.header.get('DATE_OBS')
-        limbx_headertags = ['LIMBX' + str(num) for num in np.arange(0,10)]
-        limby_headertags = ['LIMBY' + str(num) for num in np.arange(0,10)]
+        limbx_headertags = ['LIMB' + str(num) + '_X' for num in np.arange(0,10)]
+        limby_headertags = ['LIMB' + str(num) + '_Y' for num in np.arange(0,10)]
         xlimbs = [self.header.get(tag) for tag in limbx_headertags]
         ylimbs = [self.header.get(tag) for tag in limby_headertags]
         self.limbs = np.array(zip(xlimbs, np.transpose(ylimbs)))
-        fidx_headertags = ['FIDUCIALX' + str(num) for num in np.arange(0,10)]
-        fidy_headertags = ['FIDUCIALY' + str(num) for num in np.arange(0,10)]
+        fidx_headertags = ['FID' + str(num) + '_X' for num in np.arange(0,10)]
+        fidy_headertags = ['FID' + str(num) + '_Y' for num in np.arange(0,10)]
         xfids = [self.header.get(tag) for tag in fidx_headertags]
         yfids = [self.header.get(tag) for tag in fidy_headertags]
         self.fiducials = np.array(zip(np.transpose(xfids), yfids))
-        fididx_headertags = ['FIDUCIALX' + str(num) + 'ID' for num in np.arange(0,10)]
-        fididy_headertags = ['FIDUCIALY' + str(num) + 'ID' for num in np.arange(0,10)]
+        fididx_headertags = ['FID' + str(num) + 'ID_X' for num in np.arange(0,10)]
+        fididy_headertags = ['FID' + str(num) + 'ID_Y' for num in np.arange(0,10)]
         xids = [self.header.get(tag) for tag in fididx_headertags]
         yids = [self.header.get(tag) for tag in fididy_headertags]
         self.fiducials_id = np.array(zip(xids, yids))
-        self.sun_center = np.array([self.header.get('SUN-CENTER1'), self.header.get('SUN-CENTER2')])
+        self.sun_center = np.array([self.header.get('SUNCENT1'), self.header.get('SUNCENT2')])
         if self.header.get('SLOPE1') != 0 and self.header.get('SLOPE2') != 0:
-            self.screen_center = np.abs([self.header.get('INTERCEPT1')/self.header.get('SLOPE1'), self.header.get('INTERCEPT2')/self.header.get('SLOPE2')])
+            self.screen_center = np.abs([self.header.get('INTRCPT1')/self.header.get('SLOPE1'), self.header.get('INTRCPT2')/self.header.get('SLOPE2')])
             self.screen_radius = 0.5 * (3000.0/np.abs(self.header.get('SLOPE1')) + (3000.0/np.abs(self.header.get('SLOPE2'))))
         else:
             self.screen_center = [0,0]
             self.screen_radius = 0
         self._fiducials_idtext = ['[' + str(xid) + ',' + str(yid) + ']' for xid,yid in self.fiducials_id]
-        self.date = datetime.strptime(self.header.get('DATE_OBS'), '%a %b %d %H:%M:%S %Y') + timedelta(seconds = self.header.get('TIME-FRACTION')/1e9)
-
+        self.date = get_header_time(self.header)[0]
+        
     def peek(self, log = True, zoom = False, save = False):
         c = mpatches.Circle(self.screen_center, self.screen_radius, color='b', fill = False, lw = 3)
         fig = plt.figure()
@@ -248,6 +250,11 @@ def get_fits_files(directory):
 def png_to_mpg4():
     os.system('ffmpeg -f image2 -i image_%4d.png movie.mp4')
 
+def get_header_time(header):
+    time1 = datetime.datetime.fromtimestamp(header.get('RT_SEC') + header.get('RT_NSEC')/1e9)
+    time2 = datetime.strptime(header.get('DATE_OBS'), '%a %b %d %H:%M:%S %Y') + timedelta(seconds = header.get('TIME-FRACTION')/1e9)
+    return [time1, time2]
+
 def plot_pyas(fits_file, closeup = False, log = True):
     p = pyas(fits_file)
     xrange = [0,p.data[0,:].size]
@@ -308,7 +315,7 @@ def get_lc(files, key, limit = False):
     for file in files:
         print("Opening file " + file + " (" + str(i) + "/" + str(len(files)) + ")")
         header = pyfits.getheader(file)
-        date = datetime.strptime(header.get('DATE_OBS'), '%a %b %d %H:%M:%S %Y') + timedelta(seconds = header.get('TIME-FRACTION')/1e9)
+        date = datetime.datetime.fromtimestamp(header.get('RT_SEC') + header.get('RT_NSEC')/1e9)
         times.append(date)
         values.append(header.get(key))
         i += 1
@@ -333,8 +340,8 @@ def eval_solutions(lc):
 def get_image_time(file):
     """Given a SAS image file return the date as a datetime"""
     header = pyfits.getheader(file)
-    date = datetime.strptime(header.get('DATE_OBS'), '%a %b %d %H:%M:%S %Y') + timedelta(seconds = header.get('TIME-FRACTION')/1e9)
-    return date
+    time = get_header_time(header)
+    return time
 
 def get_sun_center_lc(files):
     i = 0
