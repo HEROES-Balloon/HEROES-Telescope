@@ -11,6 +11,8 @@ import pandas
 import csv
 from scipy import ndimage
 from scipy import optimize
+from scipy.ndimage.interpolation import shift
+from scipy.misc import imresize
 
 arcsec_per_mil = 1.72
 micron_per_mil = 25.4
@@ -26,7 +28,7 @@ class MountainTimeZone(datetime.tzinfo):
     def tzname(self,dt): 
         return "UTC-6" 
     def dst(self,dt): 
-        return timedelta(0) 
+        return timedelta(hours=1) 
 
 class ras:
     def __init__(self, fits_file):
@@ -37,8 +39,9 @@ class ras:
         self.temperature = float(self.header.get('TEMPCCD'))
         self.preamp_gain = float(self.header.get('GAIN_PRE'))
         self.analog_gain = float(self.header.get('GAIN_ANA'))
+        # the following time is in UTC
         self.date = datetime.datetime.fromtimestamp(self.header.get('RT_SEC') + self.header.get('RT_NSEC')/1e9)
-        self.date = self.date.replace(tzinfo = MountainTimeZone())
+        #self.date = self.date.replace(tzinfo = MountainTimeZone())
 
     def peek(self, log = True, save = False):
         fig = plt.figure()
@@ -155,6 +158,12 @@ class pyas:
         data = self.sun_data()
         com = np.array(ndimage.measurements.center_of_mass(data))
         return com - offset
+
+def test_ras_find_relative_angle(array):
+    # apply a shift of 100 pixels in the x direction
+    shifted_array = shift(r.data, (0,100))
+    # resize the array to get the solution faster
+    resize_fraction
 
 def plot_sun_profile(pyas_obj):
     sun_center = np.floor(pyas_obj.sun_center)
