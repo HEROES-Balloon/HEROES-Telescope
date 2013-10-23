@@ -4,13 +4,15 @@ import matplotlib.patches as mpatches
 import numpy as np
 from matplotlib.colors import LogNorm
 import matplotlib.gridspec as gridspec
-from datetime import datetime, timedelta
+import datetime
 import glob
 import os
 import pandas
 import csv
 from scipy import ndimage
 from scipy import optimize
+from scipy.ndimage.interpolation import shift
+from scipy.misc import imresize
 
 arcsec_per_mil = 1.72
 micron_per_mil = 25.4
@@ -19,6 +21,45 @@ pixel_number = np.array([966, 1296])
 pixel_size_arcsec = 10.6
 
 fits_files_dir = "/Users/schriste/Desktop/Sun_Test_Images/Sun_test_images/disk2/"
+
+class MountainTimeZone(datetime.tzinfo):
+    def utcoffset(self,dt):
+        return datetime.timedelta(hours=-6,minutes=0)
+    def tzname(self,dt): 
+        return "UTC-6" 
+    def dst(self,dt): 
+        return timedelta(hours=1) 
+
+class ras:
+    def __init__(self, fits_file):
+        fits = pyfits.open(fits_file)
+        self.header = fits[0].header
+        self.data = fits[1].data
+        self.title = self.header.get('TELESCOP') + ' ' + self.header.get('INSTRUME') + ' ' + self.header.get('DATE_OBS')
+        self.temperature = float(self.header.get('TEMPCCD'))
+        self.preamp_gain = float(self.header.get('GAIN_PRE'))
+        self.analog_gain = float(self.header.get('GAIN_ANA'))
+        # the following time is in UTC
+        self.date = datetime.datetime.fromtimestamp(self.header.get('RT_SEC') + self.header.get('RT_NSEC')/1e9)
+        #self.date = self.date.replace(tzinfo = MountainTimeZone())
+
+    def peek(self, log = True, save = False):
+        fig = plt.figure()
+        ax1 = fig.add_subplot(111, aspect=1)
+        ax1.set_title(self.title)
+        ax1.set_ylabel('pixels')
+        ax1.set_xlabel('pixels')
+            
+        if log:
+            cs = ax1.imshow(self.data, cmap=plt.cm.bone, norm = LogNorm())
+        else:
+            cs = ax1.imshow(self.data, cmap=plt.cm.bone)
+        
+        plt.colorbar(cs)
+        if type(save) == type('str'): 
+            plt.savefig(save, bbox_inches=0)
+            print("saving " + save)
+        else: plt.show()
 
 class pyas:
     def __init__(self, fits_file):
@@ -117,6 +158,12 @@ class pyas:
         data = self.sun_data()
         com = np.array(ndimage.measurements.center_of_mass(data))
         return com - offset
+
+def test_ras_find_relative_angle(array):
+    # apply a shift of 100 pixels in the x direction
+    shifted_array = shift(r.data, (0,100))
+    # resize the array to get the solution faster
+    resize_fraction
 
 def plot_sun_profile(pyas_obj):
     sun_center = np.floor(pyas_obj.sun_center)
