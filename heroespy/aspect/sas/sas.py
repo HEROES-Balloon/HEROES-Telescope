@@ -13,6 +13,7 @@ from scipy import ndimage
 from scipy import optimize
 from scipy.ndimage.interpolation import shift
 from scipy.misc import imresize
+from heroespy.util import times
 
 arcsec_per_mil = 1.72
 micron_per_mil = 25.4
@@ -21,10 +22,22 @@ pixel_number = np.array([966, 1296])
 pixel_size_arcsec = 10.6
 
 data_base_dir = '/Volumes/HEROES_DATA/'
-data_sas_dir = data_base_dir + 'SAS-1'
+data_sas_dir = [data_base_dir + 'SAS-1/', data_base_dir + 'SAS-2/']
 
-fits_files_dir = "/Users/schriste/Desktop/Sun_Test_Images/Sun_test_images/disk2/"
-
+def get_all_files(type='pyasf'):
+    """Returns all files from system type (pyasf, pyasr, ras)"""
+    file_dir = data_base_dir
+    if type == "pyasf":
+        file_dir = data_sas_dir[0]
+    if type == "pyasr" or type == "ras":
+        file_dir = data_sas_dir[1]        
+    dirs = glob.glob(file_dir + times.launch.strftime("%y%m%d_*"))
+    files = []
+    for dir in dirs:
+        files.append(glob.glob(dir + "/" + type + "*.fits"))
+    files = [j for i in files for j in i]
+    return files
+    
 class MountainTimeZone(datetime.tzinfo):
     def utcoffset(self,dt):
         return datetime.timedelta(hours=-6,minutes=0)
