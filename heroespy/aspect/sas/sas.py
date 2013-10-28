@@ -14,12 +14,16 @@ from scipy import optimize
 from scipy.ndimage.interpolation import shift
 from scipy.misc import imresize
 from heroespy.util import times
+from astropy import units
 
 arcsec_per_mil = 1.72
 micron_per_mil = 25.4
-pixel_size_micron = 6.45
+pixel_size = 6.45 * units.Unit('micron')
+
+#plate_scale = np.arctan((0.0024/pyas_focal_length).decompose())
 pixel_number = np.array([966, 1296])
-pixel_size_arcsec = 10.6
+pixel_size = 10.6 * units.Unit('arcsec')
+pyas_focal_length = 2 * units.Unit('m')
 
 data_base_dir = '/Volumes/HEROES_DATA/'
 data_sas_dir = [data_base_dir + 'SAS-1/', data_base_dir + 'SAS-2/']
@@ -108,29 +112,30 @@ class pyas:
         self._fiducials_idtext = ['[' + str(xid) + ',' + str(yid) + ']' for xid,yid in self.fiducials_id]
         self.date = get_header_time(self.header)[0]
         
-    def peek(self, log = True, zoom = False, save = False):
+    def plot(self, log = True, zoom = False, axes=None, **imshow_args):
+        #Get current axes
+        if not axes:
+            axes = plt.gca()
+
+        axes = fig.add_subplot(111, aspect=1)
+        axes.set_title(self.title)
+        axes.set_ylabel('pixels')
+        axes.set_xlabel('pixels')
         c = mpatches.Circle(self.screen_center, self.screen_radius, color='b', fill = False, lw = 3)
-        fig = plt.figure()
-        ax1 = fig.add_subplot(111, aspect=1)
-        ax1.set_title(self.title)
-        ax1.set_ylabel('pixels')
-        ax1.set_xlabel('pixels')
         
         if zoom is False:
             xrange = [0,self.data[0,:].size]
             yrange = [0,self.data[:,0].size]
         else:
-        	#index = (self.limbs[:,0] > 0) * (self.limbs[:,1] > 0)
-        	#if np.any(index):
 			xrange = zoom * [self.sun_center[0] - 110, self.sun_center[0] + 110] + self.offset[0]
 			yrange = zoom * [self.sun_center[1] - 110, self.sun_center[1] + 110] + self.offset[1]
         ax1.set_xlim(xrange[0], xrange[1])
         ax1.set_ylim(yrange[0], yrange[1])
     
         if log:
-            cs = ax1.imshow(self.data, cmap=plt.cm.bone, norm = LogNorm())
+            ret = axes.imshow(self.data, cmap=plt.cm.bone, norm = LogNorm())
         else:
-            cs = ax1.imshow(self.data, cmap=plt.cm.bone)
+            ret = axes.imshow(self.data, cmap=plt.cm.bone)
         ax1.add_patch(c)
         ax1.plot(self.screen_center[0] + self.offset[1], self.screen_center[1] + self.offset[1], "b+")
         ax1.plot(self.fiducials[:,0] + self.offset[0], self.fiducials[:,1] + self.offset[1], "b+")
@@ -139,13 +144,26 @@ class pyas:
                 ax1.text(self.fiducials[i,0] + self.offset[0], self.fiducials[i,1] + self.offset[1], self._fiducials_idtext[i], color = "blue")
         ax1.plot(self.sun_center[0] + self.offset[0], self.sun_center[1] + self.offset[1], "r+", markersize = 20)
         ax1.plot(self.limbs[:,0] + self.offset[0], self.limbs[:,1] + self.offset[1], "w+", markersize = 15)
-
         plt.colorbar(cs)
+        plt.sci(ret)
+        return ret
+    
+    def peek(self, log = True, zoom = False, save = False):
+        # Create a figure and add title and axes
+        figure = plt.figure()
+        axes = figure.gca()
+
+        im = self.plot(axes=axes,**matplot_args)        
+        
+        figure.colorbar(im)
+    
         if type(save) == type('str'): 
             plt.savefig(save, bbox_inches=0)
             print("saving " + save)
         else: plt.show()
-    
+            
+        return figure
+        
     def sun_range(self, crop_size = 350):
         xrange = np.floor(self.sun_center[0] + 0.5 * crop_size * np.array([-1,1]))
         yrange = np.floor(self.sun_center[1] + 0.5 * crop_size * np.array([-1,1]))
@@ -173,6 +191,10 @@ class pyas:
         data = self.sun_data()
         com = np.array(ndimage.measurements.center_of_mass(data))
         return com - offset
+    
+    def _pixel_to_arcsec(self, xpixel, ypixel):
+        
+        np.abs([self.header.get('INTRCPT1')/self.header.get('SLOPE1'), self.header.get('INTRCPT2')/self.header.get('SLOPE2')])
 
 def test_ras_find_relative_angle(array):
     # apply a shift of 100 pixels in the x direction
