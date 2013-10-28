@@ -103,6 +103,7 @@ class pyas:
         yids = [self.header.get(tag) for tag in fididy_headertags]
         self.fiducials_id = np.array(zip(xids, yids))
         self.sun_center = np.array([self.header.get('SUNCENT1'), self.header.get('SUNCENT2')])
+        self.target = np.array([self.header.get('TARGET_X'), self.header.get('TARGET_Y')])
         if self.header.get('SLOPE1') != 0 and self.header.get('SLOPE2') != 0:
             self.screen_center = np.abs([self.header.get('INTRCPT1')/self.header.get('SLOPE1'), self.header.get('INTRCPT2')/self.header.get('SLOPE2')])
             self.screen_radius = 0.5 * (3000.0/np.abs(self.header.get('SLOPE1')) + (3000.0/np.abs(self.header.get('SLOPE2'))))
@@ -140,7 +141,6 @@ class pyas:
         if not axes:
             axes = plt.gca()
 
-        axes = fig.add_subplot(111, aspect=1)
         axes.set_title(self.title)
         axes.set_ylabel('pixels')
         axes.set_xlabel('pixels')
@@ -152,22 +152,22 @@ class pyas:
         else:
 			xrange = zoom * [self.sun_center[0] - 110, self.sun_center[0] + 110] + self.offset[0]
 			yrange = zoom * [self.sun_center[1] - 110, self.sun_center[1] + 110] + self.offset[1]
-        ax1.set_xlim(xrange[0], xrange[1])
-        ax1.set_ylim(yrange[0], yrange[1])
+        axes.set_xlim(xrange[0], xrange[1])
+        axes.set_ylim(yrange[0], yrange[1])
     
         if log:
             ret = axes.imshow(self.data, cmap=plt.cm.bone, norm = LogNorm())
         else:
             ret = axes.imshow(self.data, cmap=plt.cm.bone)
-        ax1.add_patch(c)
-        ax1.plot(self.screen_center[0] + self.offset[1], self.screen_center[1] + self.offset[1], "b+")
-        ax1.plot(self.fiducials[:,0] + self.offset[0], self.fiducials[:,1] + self.offset[1], "b+")
+        axes.add_patch(c)
+        axes.plot(self.screen_center[0] + self.offset[1], self.screen_center[1] + self.offset[1], "b+")
+        axes.plot(self.fiducials[:,0] + self.offset[0], self.fiducials[:,1] + self.offset[1], "b+")
         for i in np.arange(0, self.fiducials[:,0].size):
             if self.fiducials[i,0] != 0 and self.fiducials[i,1] != 0:
-                ax1.text(self.fiducials[i,0] + self.offset[0], self.fiducials[i,1] + self.offset[1], self._fiducials_idtext[i], color = "blue")
-        ax1.plot(self.sun_center[0] + self.offset[0], self.sun_center[1] + self.offset[1], "r+", markersize = 20)
-        ax1.plot(self.limbs[:,0] + self.offset[0], self.limbs[:,1] + self.offset[1], "w+", markersize = 15)
-        plt.colorbar(cs)
+                axes.text(self.fiducials[i,0] + self.offset[0], self.fiducials[i,1] + self.offset[1], self._fiducials_idtext[i], color = "blue")
+        axes.plot(self.sun_center[0] + self.offset[0], self.sun_center[1] + self.offset[1], "r+", markersize = 20)
+        axes.plot(self.limbs[:,0] + self.offset[0], self.limbs[:,1] + self.offset[1], "w+", markersize = 15)
+        plt.colorbar(ret)
         plt.sci(ret)
         return ret
     
@@ -215,9 +215,32 @@ class pyas:
         com = np.array(ndimage.measurements.center_of_mass(data))
         return com - offset
     
-    def _pixel_to_arcsec(self, xpixel, ypixel):
-        return np.array([(xpixel - self.screen_center[0]) * self.header.get('SLOPE1'), 
-            (xpixel - self.screen_center[1]) * self.header.get('SLOPE2')])
+    def pixel_to_arcsec(self, xypixel):
+        """Given a pixel number return the offset from the screen center in arcseconds
+        
+        Parameters
+        ----------
+        xypixel : array
+            Given as [xpixel_index, ypixel_index].
+        """
+        return np.array([(xypixel[0] - self.screen_center[0]) * self.header.get('SLOPE1'), 
+            (xypixel[1] - self.screen_center[1]) * self.header.get('SLOPE2')])
+    
+    def target_offset(self, oned = False):
+        """Returns the offset of the Sun center from the center of the screen in 
+        arcseconds
+        
+        Parameters
+        ----------
+        oned : bool (default False)
+            If true returns the offset as a single value representing the radial offset
+            in arcsec
+        """
+        offset = self.pixel_to_arcsec(self.sun_center - self.target)
+        if oned is True:
+            return np.sqrt(np.sum(offset ** 2))
+        else:
+            return offset
 
 def test_ras_find_relative_angle(array):
     # apply a shift of 100 pixels in the x direction
