@@ -112,7 +112,30 @@ class pyas:
         self._fiducials_idtext = ['[' + str(xid) + ',' + str(yid) + ']' for xid,yid in self.fiducials_id]
         self.date = get_header_time(self.header)[0]
         
-    def plot(self, log = True, zoom = False, axes=None, **imshow_args):
+    def plot(self, log = True, zoom = False, sky = True, axes=None, **imshow_args):
+        """ Plots the pyas object using matplotlib, in a method equivalent
+        to plt.imshow(). Overlays information.
+        
+        Parameters
+        ----------
+        log : bool (default True)
+            Use logarithmic scaling
+            
+        zoom : bool (default False)
+            Show only area around the Sun, not entire pixel array
+            
+        sky : bool (default False)
+            Use sky coordinates instead of pixel coordinates (not yet implemented)
+            
+        axes: matplotlib.axes object or None
+            If provided the image will be plotted on the given axes. Else the 
+            current matplotlib axes will be used.
+        
+        **imshow_args : dict
+            Any additional imshow arguments that should be used
+            when plotting the image.
+        """
+
         #Get current axes
         if not axes:
             axes = plt.gca()
@@ -193,8 +216,8 @@ class pyas:
         return com - offset
     
     def _pixel_to_arcsec(self, xpixel, ypixel):
-        
-        np.abs([self.header.get('INTRCPT1')/self.header.get('SLOPE1'), self.header.get('INTRCPT2')/self.header.get('SLOPE2')])
+        return np.array([(xpixel - self.screen_center[0]) * self.header.get('SLOPE1'), 
+            (xpixel - self.screen_center[1]) * self.header.get('SLOPE2')])
 
 def test_ras_find_relative_angle(array):
     # apply a shift of 100 pixels in the x direction
@@ -286,8 +309,8 @@ def png_to_mpg4():
     os.system('ffmpeg -f image2 -i image_%4d.png movie.mp4')
 
 def get_header_time(header):
-    time1 = datetime.datetime.fromtimestamp(header.get('RT_SEC') + header.get('RT_NSEC')/1e9)
-    time2 = datetime.strptime(header.get('DATE_OBS'), '%a %b %d %H:%M:%S %Y') + timedelta(seconds = header.get('TIME-FRACTION')/1e9)
+    time1 = datetime.datetime.utcfromtimestamp(header.get('RT_SEC') + header.get('RT_NSEC')/1e9)
+    time2 = datetime.datetime.strptime(header.get('DATE_OBS'), '%a %b %d %H:%M:%S %Y')
     return [time1, time2]
 
 def plot_pyas(fits_file, closeup = False, log = True):
@@ -350,7 +373,7 @@ def get_lc(files, key, limit = False):
     for file in files:
         print("Opening file " + file + " (" + str(i) + "/" + str(len(files)) + ")")
         header = pyfits.getheader(file)
-        date = datetime.datetime.fromtimestamp(header.get('RT_SEC') + header.get('RT_NSEC')/1e9)
+        date = datetime.datetime.utcfromtimestamp(header.get('RT_SEC') + header.get('RT_NSEC')/1e9)
         times.append(date)
         values.append(header.get(key))
         i += 1
