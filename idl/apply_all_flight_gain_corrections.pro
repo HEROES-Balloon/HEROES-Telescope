@@ -52,22 +52,25 @@ if keyword_set(plot_spectra) then begin  ;plot spectrum if requested.
   plot,energy_pi,histpi,psym=10,xtitle='Energy (keV)',ytitle='# Events'
 endif
 
-if keyword_set(outfile) then begin ;write new event file including PI field if requested.
-  fxaddpar,hdr,'COMMENT','ENERGY field added by apply_all_flight_energy_corrections.pro. '
-  fxaddpar,hdr,'COMMENT',' ENERGY = PHA channel converted to energy (keV)'
-  fxaddpar,hdr,'COMMENT','Gain corrections applied:'
-  fxaddpar,hdr,'COMMENT', '(1) pre-flight Am scans, '
-  fxaddpar,hdr,'COMMENT', '(2) pre-flight on-axs source measurements,'  
-  fxaddpar,hdr,'COMMENT', '(3) and in-flight Cd109 lines' 
-  fxaddpar,hdr,'COMMENT','Pre-flight Am scan gain file : '
-  fxaddpar,hdr,'COMMENT', amscan_gain_file
-  fxaddpar,hdr,'COMMENT','Pre-flight On-axis gain file : '
-  fxaddpar,hdr,'COMMENT', onaxis_gain_file
-  fxaddpar,hdr,'COMMENT','Cd109 gain file: '
-  fxaddpar,hdr,'COMMENT',cd109_gain_file  
+if keyword_set(outfile) then begin ;write new event file including ENERGY field if requested.
+  fxaddpar,hdr,'TTYPE17','ENERGY',' label for field 17'
+  fxaddpar,hdr,'TFORM17','E',' data format of field: 4-byte REAL'
+  fxaddpar,hdr,'TUNIT17','keV',' physical unit of field',before='TUNIT17'
+  fxaddpar,hdr,'HISTORY','ENERGY field added by apply_all_flight_energy_corrections.pro. '
+  fxaddpar,hdr,'HISTORY',' ENERGY = PHA channel converted to energy (keV)'
+  fxaddpar,hdr,'HISTORY','Gain corrections applied:'
+  fxaddpar,hdr,'HISTORY', '(1) pre-flight Am scans, '
+  fxaddpar,hdr,'HISTORY', '(2) pre-flight on-axs source measurements,'  
+  fxaddpar,hdr,'HISTORY', '(3) and in-flight Cd109 lines' 
+  fxaddpar,hdr,'HISTORY','Pre-flight Am scan gain file : '
+  fxaddpar,hdr,'HISTORY', amscan_gain_file
+  fxaddpar,hdr,'HISTORY','Pre-flight On-axis gain file : '
+  fxaddpar,hdr,'HISTORY', onaxis_gain_file
+  fxaddpar,hdr,'HISTORY','Cd109 gain file: '
+  fxaddpar,hdr,'HISTORY',cd109_gain_file  
   if keyword_set(nominal_voltage_time_intervals_file) then begin
-    fxaddpar,hdr,'COMMENT','Nominal voltage time intervals file: '
-    fxaddpar,hdr,'COMMENT', nominal_voltage_time_intervals_file
+    fxaddpar,hdr,'HISTORY','Nominal voltage time intervals file: '
+    fxaddpar,hdr,'HISTORY', nominal_voltage_time_intervals_file
   endif  
   mwrfits,outstr,outfile,hdr
 endif
