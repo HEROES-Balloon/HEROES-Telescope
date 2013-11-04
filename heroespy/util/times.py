@@ -14,3 +14,5 @@ float = datetime(_year,_month,_days[0],14,49)
 solarobs = (datetime(_year,_month,_days[0],15,21), datetime(_year,_month,_days[0],22,34))
 shutdown = datetime(_year,_month,_days[1],14,18)
 
+# solar target command was received
+solar_target_change = (datetime(2013, 9, 21, 15, 33, 8), datetime(2013, 9, 21, 15, 33, 16))

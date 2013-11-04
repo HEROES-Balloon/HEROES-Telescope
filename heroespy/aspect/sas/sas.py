@@ -16,17 +16,32 @@ from scipy.misc import imresize
 from heroespy.util import times
 from astropy import units
 
-arcsec_per_mil = 1.72
-micron_per_mil = 25.4
-pixel_size = 6.45 * units.Unit('micron')
-
-#plate_scale = np.arctan((0.0024/pyas_focal_length).decompose())
-pixel_number = np.array([966, 1296])
-pixel_size = 10.6 * units.Unit('arcsec')
-pyas_focal_length = 2 * units.Unit('m')
-
 data_base_dir = '/Volumes/HEROES_DATA/'
 data_sas_dir = [data_base_dir + 'SAS-1/', data_base_dir + 'SAS-2/']
+
+class pyasCalibration:
+    """A class to store the calibration data for the PYAS systems"""
+    def __init__(self, isFront):
+        if isFront:
+            self.clock_angle = -32.425
+            self.center_offset_mils = np.array([124.68, -74.64])
+            self.twist = 180.0
+        else:
+            self.clock_angle = -52.175
+            self.center_mils = np.array([-105.59, -48.64])
+            self.twist = 0.0
+        self.pixel_number = np.array([966, 1296])
+        self.arcsec_per_mil = 1.72
+        self.micron_per_mil = 25.4
+        self.pixel_size_um = 6.45 * units.Unit('micron')
+        self.focal_length_m = 2
+        self.screen_radius_mil = 3000
+        
+class DataMissingError(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)
 
 def get_all_files(type='pyasf'):
     """Returns all files from system type (pyasf, pyasr, ras)"""
@@ -40,17 +55,50 @@ def get_all_files(type='pyasf'):
     for dir in dirs:
         files.append(glob.glob(dir + "/" + type + "*.fits"))
     files = [j for i in files for j in i]
+    if files == []:
+        raise DataMissingError(file_dir)
     return files
     
-class MountainTimeZone(datetime.tzinfo):
-    def utcoffset(self,dt):
-        return datetime.timedelta(hours=-6,minutes=0)
-    def tzname(self,dt): 
-        return "UTC-6" 
-    def dst(self,dt): 
-        return timedelta(hours=1) 
-
 class ras:
+    """
+    A RAS object 
+
+    Parameters
+    ----------
+    file : str
+        A string containing the FITS file name of a PYAS image.
+
+    Attributes
+    ----------
+    header : pyfits.header
+        The original FITS header
+    data : ndarray
+        Array of the image array
+    limbs : ndarray
+        An array of the limb positions on the image sensor
+    fiducials : ndarray
+        An array of the fiducial positions on the image sensor
+    fiducials_id : ndarray
+        An array of the fiducial id (e.g. [0,0]) for the corresponding fiducial
+    sun_center : ndarray
+        The location of the sun centor on the image sensor
+    target : ndarray
+        The location of the solar target in arcsec
+    date : datetime
+        Image observation time
+    screen_center : ndarray
+        The derived location of the screen center based on fiducial ids.
+    screen_radius : float
+        The radius of the screen in pixel coordinates.
+    
+    Methods
+    -------
+    plot()
+        Return a matplotlib imageaxes instance, like plt.imshow()
+    peek()
+        Display a matplotlib plot to the screen 
+    
+    """
     def __init__(self, fits_file):
         fits = pyfits.open(fits_file)
         self.header = fits[0].header
@@ -81,17 +129,60 @@ class ras:
         else: plt.show()
 
 class pyas:
+    """
+    A PYAS object 
+
+    Parameters
+    ----------
+    file : str
+        A string containing the FITS file name of a PYAS image.
+
+    Attributes
+    ----------
+    name : str
+        The name of the pyas, either "PYAS-F" or "PYAS-R"
+    header : pyfits.header
+        The original FITS header
+    data : ndarray
+        Array of the image array
+    limbs : ndarray
+        An array of the limb positions on the image sensor
+    fiducials : ndarray
+        An array of the fiducial positions on the image sensor
+    fiducials_id : ndarray
+        An array of the fiducial id (e.g. [0,0]) for the corresponding fiducial
+    sun_center : ndarray
+        The location of the sun centor on the image sensor
+    target : ndarray
+        The location of the solar target in arcsec
+    date : datetime
+        Image observation time
+    screen_center : ndarray
+        The derived location of the screen center based on fiducial ids.
+    screen_radius : float
+        The radius of the screen in pixel coordinates.
+    
+    Methods
+    -------
+    plot()
+        Return a matplotlib imageaxes instance, like plt.imshow()
+    peek()
+        Display a matplotlib plot to the screen 
+    
+    """
     def __init__(self, fits_file):
         fits = pyfits.open(fits_file)
         self.header = fits[0].header
         self.data = fits[1].data
         self.offset = np.array([0,0])
-        self.title = self.header.get('TELESCOP') + ' ' + self.header.get('INSTRUME') + ' ' + self.header.get('DATE_OBS')
+        self.name = self.header.get('INSTRUME')
+        #process limbs
         limbx_headertags = ['LIMB' + str(num) + '_X' for num in np.arange(0,10)]
         limby_headertags = ['LIMB' + str(num) + '_Y' for num in np.arange(0,10)]
         xlimbs = [self.header.get(tag) for tag in limbx_headertags]
         ylimbs = [self.header.get(tag) for tag in limby_headertags]
         self.limbs = np.array(zip(xlimbs, np.transpose(ylimbs)))
+        #process fiducials and fiducial IDs
         fidx_headertags = ['FID' + str(num) + '_X' for num in np.arange(0,10)]
         fidy_headertags = ['FID' + str(num) + '_Y' for num in np.arange(0,10)]
         xfids = [self.header.get(tag) for tag in fidx_headertags]
@@ -102,16 +193,25 @@ class pyas:
         xids = [self.header.get(tag) for tag in fididx_headertags]
         yids = [self.header.get(tag) for tag in fididy_headertags]
         self.fiducials_id = np.array(zip(xids, yids))
+        
         self.sun_center = np.array([self.header.get('SUNCENT1'), self.header.get('SUNCENT2')])
         self.target = np.array([self.header.get('TARGET_X'), self.header.get('TARGET_Y')])
+
+        calib = pyasCalibration(self.name == "PYAS-F")
         if self.header.get('SLOPE1') != 0 and self.header.get('SLOPE2') != 0:
             self.screen_center = np.abs([self.header.get('INTRCPT1')/self.header.get('SLOPE1'), self.header.get('INTRCPT2')/self.header.get('SLOPE2')])
-            self.screen_radius = 0.5 * (3000.0/np.abs(self.header.get('SLOPE1')) + (3000.0/np.abs(self.header.get('SLOPE2'))))
+            #now calibrate the screen center
+            pixel_to_mil = np.array([self.header.get('SLOPE1'), self.header.get('SLOPE2')])
+            self.screen_center = self.screen_center + calib.center_offset_mils / pixel_to_mil 
+            self.screen_radius = 0.5 * (calib.screen_radius_mil/np.abs(self.header.get('SLOPE1')) + (calib.screen_radius_mil/np.abs(self.header.get('SLOPE2'))))
         else:
             self.screen_center = [0,0]
             self.screen_radius = 0
         self._fiducials_idtext = ['[' + str(xid) + ',' + str(yid) + ']' for xid,yid in self.fiducials_id]
         self.date = get_header_time(self.header)[0]
+    
+    def __repr__(self):
+        return self.header.get('TELESCOP') + ' ' + self.header.get('INSTRUME') + ' ' + self.header.get('DATE_OBS')
         
     def plot(self, log = True, zoom = False, sky = True, axes=None, **imshow_args):
         """ Plots the pyas object using matplotlib, in a method equivalent
@@ -141,10 +241,9 @@ class pyas:
         if not axes:
             axes = plt.gca()
 
-        axes.set_title(self.title)
+        axes.set_title(self.__repr__())
         axes.set_ylabel('pixels')
         axes.set_xlabel('pixels')
-        c = mpatches.Circle(self.screen_center, self.screen_radius, color='b', fill = False, lw = 3)
         
         if zoom is False:
             xrange = [0,self.data[0,:].size]
@@ -159,8 +258,7 @@ class pyas:
             ret = axes.imshow(self.data, cmap=plt.cm.bone, norm = LogNorm())
         else:
             ret = axes.imshow(self.data, cmap=plt.cm.bone)
-        axes.add_patch(c)
-        axes.plot(self.screen_center[0] + self.offset[1], self.screen_center[1] + self.offset[1], "b+")
+        
         axes.plot(self.fiducials[:,0] + self.offset[0], self.fiducials[:,1] + self.offset[1], "b+")
         for i in np.arange(0, self.fiducials[:,0].size):
             if self.fiducials[i,0] != 0 and self.fiducials[i,1] != 0:
@@ -168,6 +266,12 @@ class pyas:
         axes.plot(self.sun_center[0] + self.offset[0], self.sun_center[1] + self.offset[1], "r+", markersize = 20)
         axes.plot(self.limbs[:,0] + self.offset[0], self.limbs[:,1] + self.offset[1], "w+", markersize = 15)
         plt.colorbar(ret)
+        #plot a cross at the screen center
+        axes.plot(self.screen_center[0] + self.offset[0], self.screen_center[1] + self.offset[1], "b+", markersize = 20)
+         # plot a circle representing the screen
+        c = mpatches.Circle(self.screen_center + self.offset, self.screen_radius, color='b', fill = False, lw = 3)
+        axes.add_patch(c)
+
         plt.sci(ret)
         return ret
     
@@ -176,8 +280,7 @@ class pyas:
         figure = plt.figure()
         axes = figure.gca()
 
-        im = self.plot(axes=axes,**matplot_args)        
-        
+        im = self.plot(axes=axes,**matplot_args)
         figure.colorbar(im)
     
         if type(save) == type('str'): 
@@ -223,8 +326,9 @@ class pyas:
         xypixel : array
             Given as [xpixel_index, ypixel_index].
         """
-        return np.array([(xypixel[0] - self.screen_center[0]) * self.header.get('SLOPE1'), 
-            (xypixel[1] - self.screen_center[1]) * self.header.get('SLOPE2')])
+        calib = pyasCalibration(self.name == "PYAS-F")
+        pixel_to_mil = np.abs(np.array([self.header.get('SLOPE1'), self.header.get('SLOPE2')]))
+        return (((np.array(xypixel) - self.screen_center) * pixel_to_mil))* calib.arcsec_per_mil
     
     def target_offset(self, oned = False):
         """Returns the offset of the Sun center from the center of the screen in 
@@ -236,7 +340,9 @@ class pyas:
             If true returns the offset as a single value representing the radial offset
             in arcsec
         """
-        offset = self.pixel_to_arcsec(self.sun_center - self.target)
+        angle = np.deg2rad(-self.header.get('CLOCKANG') + self.header.get('NORTHANG'))
+        calib = pyasCalibration(self.name == "PYAS-F")
+        offset = self.pixel_to_arcsec(self.sun_center - self.target) #*  [np.cos(angle), np.sin(angle)]
         if oned is True:
             return np.sqrt(np.sum(offset ** 2))
         else:
