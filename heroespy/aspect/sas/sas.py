@@ -330,9 +330,8 @@ class pyas:
         pixel_to_mil = np.abs(np.array([self.header.get('SLOPE1'), self.header.get('SLOPE2')]))
         return (((np.array(xypixel) - self.screen_center) * pixel_to_mil))* calib.arcsec_per_mil
     
-    def target_offset(self, oned = False):
-        """Returns the offset of the Sun center from the center of the screen in 
-        arcseconds
+    def pointing(self, oned = False):
+        """Returns where PYAS was pointing on the Sun in heliocentric coordinates (arcseconds)
         
         Parameters
         ----------
@@ -340,9 +339,25 @@ class pyas:
             If true returns the offset as a single value representing the radial offset
             in arcsec
         """
-        angle = np.deg2rad(-self.header.get('CLOCKANG') + self.header.get('NORTHANG'))
         calib = pyasCalibration(self.name == "PYAS-F")
-        offset = self.pixel_to_arcsec(self.sun_center - self.target) #*  [np.cos(angle), np.sin(angle)]
+        angle = np.deg2rad(self.header.get('CLOCKANG') + self.header.get('NORTHANG') + calib.twist)
+        rotMatrix = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle),  np.cos(angle)]])
+        xy = rotMatrix.dot(self.pixel_to_arcsec(self.sun_center))
+        if oned is True:
+            return np.sqrt(np.sum(xy ** 2))
+        else:
+            return xy
+    
+    def target_offset(self, oned = False):
+        """Returns in the offset between the pointing target and the actual pointing
+        
+        Parameters
+        ----------
+        oned : bool (default False)
+            If true returns the offset as a single value representing the radial offset
+            in arcsec
+        """
+        offset = self.pointing() - self.target
         if oned is True:
             return np.sqrt(np.sum(offset ** 2))
         else:
