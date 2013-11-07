@@ -202,6 +202,7 @@ class pyas:
             self.screen_center = np.abs([self.header.get('INTRCPT1')/self.header.get('SLOPE1'), self.header.get('INTRCPT2')/self.header.get('SLOPE2')])
             #now calibrate the screen center
             pixel_to_mil = np.array([self.header.get('SLOPE1'), self.header.get('SLOPE2')])
+            # update for calibrated screen center
             self.screen_center = self.screen_center + calib.center_offset_mils / pixel_to_mil 
             self.screen_radius = 0.5 * (calib.screen_radius_mil/np.abs(self.header.get('SLOPE1')) + (calib.screen_radius_mil/np.abs(self.header.get('SLOPE2'))))
         else:
@@ -319,7 +320,7 @@ class pyas:
         return com - offset
     
     def pixel_to_arcsec(self, xypixel):
-        """Given a pixel number return the offset from the screen center in arcseconds
+        """Given a pixel number return the offset from the calibrated screen center in arcseconds
         
         Parameters
         ----------
@@ -330,19 +331,25 @@ class pyas:
         pixel_to_mil = np.abs(np.array([self.header.get('SLOPE1'), self.header.get('SLOPE2')]))
         return (((np.array(xypixel) - self.screen_center) * pixel_to_mil))* calib.arcsec_per_mil
     
-    def pointing(self, oned = False):
+    def pointing(self, oned = False, elaz=False):
         """Returns where PYAS was pointing on the Sun in heliocentric coordinates (arcseconds)
         
         Parameters
         ----------
         oned : bool (default False)
             If true returns the offset as a single value representing the radial offset
-            in arcsec
+            in arcsec.
+        elaz : bool (default False)
+            If true than do not rotate coordinate system to heliocentric coordinates, remain in
+            elevation/azimuth coordinates.
         """
         calib = pyasCalibration(self.name == "PYAS-F")
-        angle = np.deg2rad(self.header.get('CLOCKANG') + self.header.get('NORTHANG') + calib.twist)
-        rotMatrix = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle),  np.cos(angle)]])
-        xy = rotMatrix.dot(self.pixel_to_arcsec(self.sun_center))
+        if not elaz:
+            angle = np.deg2rad(self.header.get('CLOCKANG') + self.header.get('NORTHANG') + calib.twist)
+            rotMatrix = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle),  np.cos(angle)]])
+            xy = rotMatrix.dot(self.pixel_to_arcsec(self.sun_center))
+        else:
+            xy = self.pixel_to_arcsec(self.sun_center)
         if oned is True:
             return np.sqrt(np.sum(xy ** 2))
         else:
@@ -448,9 +455,6 @@ def get_fits_files(directory):
     dir = os.path.expanduser(directory)
     files = glob.glob(directory + "*.fits")
     return files
-
-def png_to_mpg4():
-    os.system('ffmpeg -f image2 -i image_%4d.png movie.mp4')
 
 def get_header_time(header):
     time1 = datetime.datetime.utcfromtimestamp(header.get('RT_SEC') + header.get('RT_NSEC')/1e9)
@@ -585,8 +589,8 @@ def load_data_from_fits(files, keys):
     lc['FSUN-CENTER1'] = pandas.Series(calcsunx)
     lc['FSUN-CENTER2'] = pandas.Series(calcsuny)
     return lc
-    
-def create_summary_file(directory=None):
+
+def create_pyas_summary_file(directory=None):
     """Create a summary ascii file with header data values"""
     if directory is None:
         directory = fits_files_dir
