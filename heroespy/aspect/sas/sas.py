@@ -210,6 +210,7 @@ class pyas:
             self.screen_radius = 0
         self._fiducials_idtext = ['[' + str(xid) + ',' + str(yid) + ']' for xid,yid in self.fiducials_id]
         self.date = get_header_time(self.header)[0]
+        self.ctl = np.array([p.header.get('CTL_ELEV'), p.header.get('CTL_AZIM')])
     
     def __repr__(self):
         return self.header.get('TELESCOP') + ' ' + self.header.get('INSTRUME') + ' ' + self.header.get('DATE_OBS')
