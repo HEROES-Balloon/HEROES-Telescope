@@ -28,7 +28,7 @@ class pyasCalibration:
             self.twist = 180.0
         else:
             self.clock_angle = -52.175
-            self.center_mils = np.array([-105.59, -48.64])
+            self.center_offset_mils = np.array([-105.59, -48.64])
             self.twist = 0.0
         self.pixel_number = np.array([966, 1296])
         self.arcsec_per_mil = 1.72
@@ -210,7 +210,7 @@ class pyas:
             self.screen_radius = 0
         self._fiducials_idtext = ['[' + str(xid) + ',' + str(yid) + ']' for xid,yid in self.fiducials_id]
         self.date = get_header_time(self.header)[0]
-        self.ctl = np.array([p.header.get('CTL_ELEV'), p.header.get('CTL_AZIM')])
+        self.ctl = np.array([self.header.get('CTL_ELEV'), self.header.get('CTL_AZIM')])
     
     def __repr__(self):
         return self.header.get('TELESCOP') + ' ' + self.header.get('INSTRUME') + ' ' + self.header.get('DATE_OBS')
@@ -459,7 +459,11 @@ def get_fits_files(directory):
 
 def get_header_time(header):
     time1 = datetime.datetime.utcfromtimestamp(header.get('RT_SEC') + header.get('RT_NSEC')/1e9)
-    time2 = datetime.datetime.strptime(header.get('DATE_OBS'), '%a %b %d %H:%M:%S %Y')
+    try:
+        time2 = datetime.datetime.strptime(header.get('DATE_OBS'), '%a %b %d %H:%M:%S %Y')
+    except:
+        time2 = None
+        pass
     return [time1, time2]
 
 def plot_pyas(fits_file, closeup = False, log = True):
