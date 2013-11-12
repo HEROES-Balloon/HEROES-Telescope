@@ -2,7 +2,7 @@ import heroespy
 import pandas
 import numpy as np
 
-files = heroespy.sas.get_all_files(type="pyasr")
+files = heroespy.sas.get_all_files(type="pyasf")
 offset=[]
 offsetx=[]
 offsety=[]
@@ -26,12 +26,9 @@ for f in file_list:
     pointingxy = p.pointing()
     pointingx.append(pointingxy[0])
     pointingy.append(pointingxy[1])
-    ctl = p.pointing(elaz=True)
+    ctl = p.ctl
     ctlel.append(ctl[0])
     ctlaz.append(ctl[1])
-    #targetx.append(p.target[0])
-    #targety.append(p.target[1])
-    #angle.append(p.header.get('NORTHANG'))
     dates.append(p.date)
     i = i + 1
     if (i % 500 == 0):
@@ -49,4 +46,4 @@ data = pandas.DataFrame({"offset x":lc1, "offset y":lc2, "offset r":lc5, 'pointi
 date_format = "%Y-%m-%d %H:%M:%S.%f"
 
 #now save the data for later use
-data.to_csv('SAS2_pointing_data.csv', date_format = date_format)
+data.to_csv('SAS1_pointing_data2.csv', date_format = date_format)
