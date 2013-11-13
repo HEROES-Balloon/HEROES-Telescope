@@ -13,124 +13,302 @@ from scipy import ndimage
 from scipy import optimize
 from scipy.ndimage.interpolation import shift
 from scipy.misc import imresize
+from heroespy.util import times
+from astropy import units
 
-arcsec_per_mil = 1.72
-micron_per_mil = 25.4
-pixel_size_micron = 6.45
-pixel_number = np.array([966, 1296])
-pixel_size_arcsec = 10.6
+data_base_dir = '/Volumes/HEROES_DATA/'
+data_sas_dir = [data_base_dir + 'SAS-1/', data_base_dir + 'SAS-2/']
 
-fits_files_dir = "/Users/schriste/Desktop/Sun_Test_Images/Sun_test_images/disk2/"
+class pyasCalibration:
+    """A class to store the calibration data for the PYAS systems"""
+    def __init__(self, isFront):
+        if isFront:
+            self.clock_angle = -32.425
+            self.center_offset_mils = np.array([124.68, -74.64])
+            self.twist = 180.0
+        else:
+            self.clock_angle = -52.175
+            self.center_offset_mils = np.array([-105.59, -48.64])
+            self.twist = 0.0
+        self.pixel_number = np.array([966, 1296])
+        self.arcsec_per_mil = 1.72
+        self.micron_per_mil = 25.4
+        self.pixel_size_um = 6.45 * units.Unit('micron')
+        self.focal_length_m = 2
+        self.screen_radius_mil = 3000
+        
+class DataMissingError(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)
 
-class MountainTimeZone(datetime.tzinfo):
-    def utcoffset(self,dt):
-        return datetime.timedelta(hours=-6,minutes=0)
-    def tzname(self,dt): 
-        return "UTC-6" 
-    def dst(self,dt): 
-        return timedelta(hours=1) 
-
+def get_all_files(type='pyasf'):
+    """Returns all files from system type (pyasf, pyasr, ras)"""
+    file_dir = data_base_dir
+    if type == "pyasf":
+        file_dir = data_sas_dir[0]
+    if type == "pyasr" or type == "ras":
+        file_dir = data_sas_dir[1]        
+    dirs = glob.glob(file_dir + times.launch.strftime("%y%m%d_*"))
+    files = []
+    for dir in dirs:
+        files.append(glob.glob(dir + "/" + type + "*.fits"))
+    files = [j for i in files for j in i]
+    if files == []:
+        raise DataMissingError(file_dir)
+    return files
+    
 class ras:
+    """
+    A RAS object 
+
+    Parameters
+    ----------
+    file : str
+        A string containing the FITS file name of a PYAS image.
+
+    Attributes
+    ----------
+    header : pyfits.header
+        The original FITS header
+    data : ndarray
+        Array of the image array
+    limbs : ndarray
+        An array of the limb positions on the image sensor
+    fiducials : ndarray
+        An array of the fiducial positions on the image sensor
+    fiducials_id : ndarray
+        An array of the fiducial id (e.g. [0,0]) for the corresponding fiducial
+    sun_center : ndarray
+        The location of the sun centor on the image sensor
+    target : ndarray
+        The location of the solar target in arcsec
+    date : datetime
+        Image observation time
+    screen_center : ndarray
+        The derived location of the screen center based on fiducial ids.
+    screen_radius : float
+        The radius of the screen in pixel coordinates.
+    
+    Methods
+    -------
+    plot()
+        Return a matplotlib imageaxes instance, like plt.imshow()
+    peek()
+        Display a matplotlib plot to the screen 
+    
+    """
     def __init__(self, fits_file):
         fits = pyfits.open(fits_file)
         self.header = fits[0].header
         self.data = fits[1].data
-        self.title = self.header.get('TELESCOP') + ' ' + self.header.get('INSTRUME') + ' ' + self.header.get('DATE_OBS')
         self.temperature = float(self.header.get('TEMPCCD'))
         self.preamp_gain = float(self.header.get('GAIN_PRE'))
         self.analog_gain = float(self.header.get('GAIN_ANA'))
         # the following time is in UTC
-        self.date = datetime.datetime.fromtimestamp(self.header.get('RT_SEC') + self.header.get('RT_NSEC')/1e9)
-        #self.date = self.date.replace(tzinfo = MountainTimeZone())
+        self.date = get_header_time(self.header)[0]
 
-    def peek(self, log = True, save = False):
-        fig = plt.figure()
-        ax1 = fig.add_subplot(111, aspect=1)
-        ax1.set_title(self.title)
-        ax1.set_ylabel('pixels')
-        ax1.set_xlabel('pixels')
+    def __repr__(self):
+        return self.header.get('TELESCOP') + ' ' + self.header.get('INSTRUME') + ' ' + self.date.strftime("%Y-%m-%d %H:%M:%S") + ' UT'
+
+    
+    def plot(self, log = False, axes=None, **imshow_args):
+        #Get current axes
+        if not axes:
+            axes = plt.gca()
+
+        axes.set_title(self.__repr__())
+        axes.set_ylabel('pixels')
+        axes.set_xlabel('pixels')
             
         if log:
-            cs = ax1.imshow(self.data, cmap=plt.cm.bone, norm = LogNorm())
+            ret = axes.imshow(self.data, cmap=plt.cm.Greys_r, norm = LogNorm())
         else:
-            cs = ax1.imshow(self.data, cmap=plt.cm.bone)
+            ret = axes.imshow(self.data, cmap=plt.cm.bone)
+        plt.colorbar(ret)
+        plt.sci(ret)
+        return ret
         
-        plt.colorbar(cs)
+    def peek(self, log = True, save = False):
+        # Create a figure and add title and axes
+        figure = plt.figure()
+        axes = figure.gca()
+
+        im = self.plot(axes=axes, **matplot_args)
+        figure.colorbar(im)
+    
         if type(save) == type('str'): 
             plt.savefig(save, bbox_inches=0)
             print("saving " + save)
         else: plt.show()
-
+            
+        return figure   
+        
 class pyas:
+    """
+    A PYAS object 
+
+    Parameters
+    ----------
+    file : str
+        A string containing the FITS file name of a PYAS image.
+
+    Attributes
+    ----------
+    name : str
+        The name of the pyas, either "PYAS-F" or "PYAS-R"
+    header : pyfits.header
+        The original FITS header
+    data : ndarray
+        Array of the image array
+    limbs : ndarray
+        An array of the limb positions on the image sensor
+    fiducials : ndarray
+        An array of the fiducial positions on the image sensor
+    fiducials_id : ndarray
+        An array of the fiducial id (e.g. [0,0]) for the corresponding fiducial
+    sun_center : ndarray
+        The location of the sun centor on the image sensor
+    target : ndarray
+        The location of the solar target in arcsec
+    date : datetime
+        Image observation time
+    screen_center : ndarray
+        The derived location of the screen center based on fiducial ids.
+    screen_radius : float
+        The radius of the screen in pixel coordinates.
+    
+    Methods
+    -------
+    plot()
+        Return a matplotlib imageaxes instance, like plt.imshow()
+    peek()
+        Display a matplotlib plot to the screen 
+    
+    """
     def __init__(self, fits_file):
         fits = pyfits.open(fits_file)
         self.header = fits[0].header
         self.data = fits[1].data
         self.offset = np.array([0,0])
-        self.title = self.header.get('TELESCOP') + ' ' + self.header.get('INSTRUME') + ' ' + self.header.get('DATE_OBS')
-        limbx_headertags = ['LIMBX' + str(num) for num in np.arange(0,10)]
-        limby_headertags = ['LIMBY' + str(num) for num in np.arange(0,10)]
+        self.name = self.header.get('INSTRUME')
+        #process limbs
+        limbx_headertags = ['LIMB' + str(num) + '_X' for num in np.arange(0,10)]
+        limby_headertags = ['LIMB' + str(num) + '_Y' for num in np.arange(0,10)]
         xlimbs = [self.header.get(tag) for tag in limbx_headertags]
         ylimbs = [self.header.get(tag) for tag in limby_headertags]
         self.limbs = np.array(zip(xlimbs, np.transpose(ylimbs)))
-        fidx_headertags = ['FIDUCIALX' + str(num) for num in np.arange(0,10)]
-        fidy_headertags = ['FIDUCIALY' + str(num) for num in np.arange(0,10)]
+        #process fiducials and fiducial IDs
+        fidx_headertags = ['FID' + str(num) + '_X' for num in np.arange(0,10)]
+        fidy_headertags = ['FID' + str(num) + '_Y' for num in np.arange(0,10)]
         xfids = [self.header.get(tag) for tag in fidx_headertags]
         yfids = [self.header.get(tag) for tag in fidy_headertags]
         self.fiducials = np.array(zip(np.transpose(xfids), yfids))
-        fididx_headertags = ['FIDUCIALX' + str(num) + 'ID' for num in np.arange(0,10)]
-        fididy_headertags = ['FIDUCIALY' + str(num) + 'ID' for num in np.arange(0,10)]
+        fididx_headertags = ['FID' + str(num) + 'ID_X' for num in np.arange(0,10)]
+        fididy_headertags = ['FID' + str(num) + 'ID_Y' for num in np.arange(0,10)]
         xids = [self.header.get(tag) for tag in fididx_headertags]
         yids = [self.header.get(tag) for tag in fididy_headertags]
         self.fiducials_id = np.array(zip(xids, yids))
-        self.sun_center = np.array([self.header.get('SUN-CENTER1'), self.header.get('SUN-CENTER2')])
+        
+        self.sun_center = np.array([self.header.get('SUNCENT1'), self.header.get('SUNCENT2')])
+        self.target = np.array([self.header.get('TARGET_X'), self.header.get('TARGET_Y')])
+
+        calib = pyasCalibration(self.name == "PYAS-F")
         if self.header.get('SLOPE1') != 0 and self.header.get('SLOPE2') != 0:
-            self.screen_center = np.abs([self.header.get('INTERCEPT1')/self.header.get('SLOPE1'), self.header.get('INTERCEPT2')/self.header.get('SLOPE2')])
-            self.screen_radius = 0.5 * (3000.0/np.abs(self.header.get('SLOPE1')) + (3000.0/np.abs(self.header.get('SLOPE2'))))
+            self.screen_center = np.abs([self.header.get('INTRCPT1')/self.header.get('SLOPE1'), self.header.get('INTRCPT2')/self.header.get('SLOPE2')])
+            #now calibrate the screen center
+            pixel_to_mil = np.array([self.header.get('SLOPE1'), self.header.get('SLOPE2')])
+            # update for calibrated screen center
+            self.screen_center = self.screen_center + calib.center_offset_mils / pixel_to_mil 
+            self.screen_radius = 0.5 * (calib.screen_radius_mil/np.abs(self.header.get('SLOPE1')) + (calib.screen_radius_mil/np.abs(self.header.get('SLOPE2'))))
         else:
             self.screen_center = [0,0]
             self.screen_radius = 0
         self._fiducials_idtext = ['[' + str(xid) + ',' + str(yid) + ']' for xid,yid in self.fiducials_id]
-        self.date = datetime.strptime(self.header.get('DATE_OBS'), '%a %b %d %H:%M:%S %Y') + timedelta(seconds = self.header.get('TIME-FRACTION')/1e9)
+        self.date = get_header_time(self.header)[0]
+        self.ctl = np.array([self.header.get('CTL_ELEV'), self.header.get('CTL_AZIM')])
+    
+    def __repr__(self):
+        return self.header.get('TELESCOP') + ' ' + self.header.get('INSTRUME') + ' ' + self.date.strftime("%Y-%m-%d %H:%M:%S UT") + ' UT'
+        
+    def plot(self, log = True, zoom = False, sky = True, axes=None, **imshow_args):
+        """ Plots the pyas object using matplotlib, in a method equivalent
+        to plt.imshow(). Overlays information.
+        
+        Parameters
+        ----------
+        log : bool (default True)
+            Use logarithmic scaling
+            
+        zoom : bool (default False)
+            Show only area around the Sun, not entire pixel array
+            
+        sky : bool (default False)
+            Use sky coordinates instead of pixel coordinates (not yet implemented)
+            
+        axes: matplotlib.axes object or None
+            If provided the image will be plotted on the given axes. Else the 
+            current matplotlib axes will be used.
+        
+        **imshow_args : dict
+            Any additional imshow arguments that should be used
+            when plotting the image.
+        """
 
-    def peek(self, log = True, zoom = False, save = False):
-        c = mpatches.Circle(self.screen_center, self.screen_radius, color='b', fill = False, lw = 3)
-        fig = plt.figure()
-        ax1 = fig.add_subplot(111, aspect=1)
-        ax1.set_title(self.title)
-        ax1.set_ylabel('pixels')
-        ax1.set_xlabel('pixels')
+        #Get current axes
+        if not axes:
+            axes = plt.gca()
+
+        axes.set_title(self.__repr__())
+        axes.set_ylabel('pixels')
+        axes.set_xlabel('pixels')
         
         if zoom is False:
             xrange = [0,self.data[0,:].size]
             yrange = [0,self.data[:,0].size]
         else:
-        	#index = (self.limbs[:,0] > 0) * (self.limbs[:,1] > 0)
-        	#if np.any(index):
 			xrange = zoom * [self.sun_center[0] - 110, self.sun_center[0] + 110] + self.offset[0]
 			yrange = zoom * [self.sun_center[1] - 110, self.sun_center[1] + 110] + self.offset[1]
-        ax1.set_xlim(xrange[0], xrange[1])
-        ax1.set_ylim(yrange[0], yrange[1])
+        axes.set_xlim(xrange[0], xrange[1])
+        axes.set_ylim(yrange[0], yrange[1])
     
         if log:
-            cs = ax1.imshow(self.data, cmap=plt.cm.bone, norm = LogNorm())
+            ret = axes.imshow(self.data, cmap=plt.cm.bone, norm = LogNorm())
         else:
-            cs = ax1.imshow(self.data, cmap=plt.cm.bone)
-        ax1.add_patch(c)
-        ax1.plot(self.screen_center[0] + self.offset[1], self.screen_center[1] + self.offset[1], "b+")
-        ax1.plot(self.fiducials[:,0] + self.offset[0], self.fiducials[:,1] + self.offset[1], "b+")
+            ret = axes.imshow(self.data, cmap=plt.cm.bone)
+        
+        axes.plot(self.fiducials[:,0] + self.offset[0], self.fiducials[:,1] + self.offset[1], "b+")
         for i in np.arange(0, self.fiducials[:,0].size):
             if self.fiducials[i,0] != 0 and self.fiducials[i,1] != 0:
-                ax1.text(self.fiducials[i,0] + self.offset[0], self.fiducials[i,1] + self.offset[1], self._fiducials_idtext[i], color = "blue")
-        ax1.plot(self.sun_center[0] + self.offset[0], self.sun_center[1] + self.offset[1], "r+", markersize = 20)
-        ax1.plot(self.limbs[:,0] + self.offset[0], self.limbs[:,1] + self.offset[1], "w+", markersize = 15)
+                axes.text(self.fiducials[i,0] + self.offset[0], self.fiducials[i,1] + self.offset[1], self._fiducials_idtext[i], color = "blue")
+        axes.plot(self.sun_center[0] + self.offset[0], self.sun_center[1] + self.offset[1], "r+", markersize = 20)
+        axes.plot(self.limbs[:,0] + self.offset[0], self.limbs[:,1] + self.offset[1], "w+", markersize = 15)
+        plt.colorbar(ret)
+        #plot a cross at the screen center
+        axes.plot(self.screen_center[0] + self.offset[0], self.screen_center[1] + self.offset[1], "b+", markersize = 20)
+         # plot a circle representing the screen
+        c = mpatches.Circle(self.screen_center + self.offset, self.screen_radius, color='b', fill = False, lw = 3)
+        axes.add_patch(c)
 
-        plt.colorbar(cs)
+        plt.sci(ret)
+        return ret
+    
+    def peek(self, log = True, zoom = False, save = False):
+        # Create a figure and add title and axes
+        figure = plt.figure()
+        axes = figure.gca()
+
+        im = self.plot(axes=axes,**matplot_args)
+        figure.colorbar(im)
+    
         if type(save) == type('str'): 
             plt.savefig(save, bbox_inches=0)
             print("saving " + save)
         else: plt.show()
-    
+            
+        return figure
+        
     def sun_range(self, crop_size = 350):
         xrange = np.floor(self.sun_center[0] + 0.5 * crop_size * np.array([-1,1]))
         yrange = np.floor(self.sun_center[1] + 0.5 * crop_size * np.array([-1,1]))
@@ -158,6 +336,57 @@ class pyas:
         data = self.sun_data()
         com = np.array(ndimage.measurements.center_of_mass(data))
         return com - offset
+    
+    def pixel_to_arcsec(self, xypixel):
+        """Given a pixel number return the offset from the calibrated screen center in arcseconds
+        
+        Parameters
+        ----------
+        xypixel : array
+            Given as [xpixel_index, ypixel_index].
+        """
+        calib = pyasCalibration(self.name == "PYAS-F")
+        pixel_to_mil = np.abs(np.array([self.header.get('SLOPE1'), self.header.get('SLOPE2')]))
+        return (((np.array(xypixel) - self.screen_center) * pixel_to_mil))* calib.arcsec_per_mil
+    
+    def pointing(self, oned = False, elaz=False):
+        """Returns where PYAS was pointing on the Sun in heliocentric coordinates (arcseconds)
+        
+        Parameters
+        ----------
+        oned : bool (default False)
+            If true returns the offset as a single value representing the radial offset
+            in arcsec.
+        elaz : bool (default False)
+            If true than do not rotate coordinate system to heliocentric coordinates, remain in
+            elevation/azimuth coordinates.
+        """
+        calib = pyasCalibration(self.name == "PYAS-F")
+        if not elaz:
+            angle = np.deg2rad(self.header.get('CLOCKANG') + self.header.get('NORTHANG') + calib.twist)
+            rotMatrix = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle),  np.cos(angle)]])
+            xy = rotMatrix.dot(self.pixel_to_arcsec(self.sun_center))
+        else:
+            xy = self.pixel_to_arcsec(self.sun_center)
+        if oned is True:
+            return np.sqrt(np.sum(xy ** 2))
+        else:
+            return xy
+    
+    def target_offset(self, oned = False):
+        """Returns in the offset between the pointing target and the actual pointing
+        
+        Parameters
+        ----------
+        oned : bool (default False)
+            If true returns the offset as a single value representing the radial offset
+            in arcsec
+        """
+        offset = self.pointing() - self.target
+        if oned is True:
+            return np.sqrt(np.sum(offset ** 2))
+        else:
+            return offset
 
 def test_ras_find_relative_angle(array):
     # apply a shift of 100 pixels in the x direction
@@ -245,8 +474,14 @@ def get_fits_files(directory):
     files = glob.glob(directory + "*.fits")
     return files
 
-def png_to_mpg4():
-    os.system('ffmpeg -f image2 -i image_%4d.png movie.mp4')
+def get_header_time(header):
+    time1 = datetime.datetime.utcfromtimestamp(header.get('RT_SEC') + header.get('RT_NSEC')/1e9)
+    try:
+        time2 = datetime.datetime.strptime(header.get('DATE_OBS'), '%a %b %d %H:%M:%S %Y')
+    except:
+        time2 = None
+        pass
+    return [time1, time2]
 
 def plot_pyas(fits_file, closeup = False, log = True):
     p = pyas(fits_file)
@@ -308,7 +543,7 @@ def get_lc(files, key, limit = False):
     for file in files:
         print("Opening file " + file + " (" + str(i) + "/" + str(len(files)) + ")")
         header = pyfits.getheader(file)
-        date = datetime.strptime(header.get('DATE_OBS'), '%a %b %d %H:%M:%S %Y') + timedelta(seconds = header.get('TIME-FRACTION')/1e9)
+        date = datetime.datetime.utcfromtimestamp(header.get('RT_SEC') + header.get('RT_NSEC')/1e9)
         times.append(date)
         values.append(header.get(key))
         i += 1
@@ -333,8 +568,8 @@ def eval_solutions(lc):
 def get_image_time(file):
     """Given a SAS image file return the date as a datetime"""
     header = pyfits.getheader(file)
-    date = datetime.strptime(header.get('DATE_OBS'), '%a %b %d %H:%M:%S %Y') + timedelta(seconds = header.get('TIME-FRACTION')/1e9)
-    return date
+    time = get_header_time(header)
+    return time
 
 def get_sun_center_lc(files):
     i = 0
@@ -376,8 +611,8 @@ def load_data_from_fits(files, keys):
     lc['FSUN-CENTER1'] = pandas.Series(calcsunx)
     lc['FSUN-CENTER2'] = pandas.Series(calcsuny)
     return lc
-    
-def create_summary_file(directory=None):
+
+def create_pyas_summary_file(directory=None):
     """Create a summary ascii file with header data values"""
     if directory is None:
         directory = fits_files_dir
