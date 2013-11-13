@@ -110,24 +110,41 @@ class ras:
         # the following time is in UTC
         self.date = get_header_time(self.header)[0]
 
-    def peek(self, log = True, save = False):
-        fig = plt.figure()
-        ax1 = fig.add_subplot(111, aspect=1)
-        ax1.set_title(self.title)
-        ax1.set_ylabel('pixels')
-        ax1.set_xlabel('pixels')
+    def __repr__(self):
+        return self.header.get('TELESCOP') + ' ' + self.header.get('INSTRUME') + ' ' + self.header.get('DATE_OBS')
+    
+    def plot(self, log = True, axes=None, **imshow_args):
+        #Get current axes
+        if not axes:
+            axes = plt.gca()
+
+        axes.set_title(self.title)
+        axes.set_ylabel('pixels')
+        axes.set_xlabel('pixels')
             
         if log:
-            cs = ax1.imshow(self.data, cmap=plt.cm.bone, norm = LogNorm())
+            cs = axes.imshow(self.data, cmap=plt.cm.bone, norm = LogNorm())
         else:
-            cs = ax1.imshow(self.data, cmap=plt.cm.bone)
+            cs = axes.imshow(self.data, cmap=plt.cm.bone)
+
+        plt.sci(ret)
+        return ret
         
-        plt.colorbar(cs)
+    def peek(self, log = True, save = False):
+        # Create a figure and add title and axes
+        figure = plt.figure()
+        axes = figure.gca()
+
+        im = self.plot(axes=axes, **matplot_args)
+        figure.colorbar(im)
+    
         if type(save) == type('str'): 
             plt.savefig(save, bbox_inches=0)
             print("saving " + save)
         else: plt.show()
-
+            
+        return figure   
+        
 class pyas:
     """
     A PYAS object 
