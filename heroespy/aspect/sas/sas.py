@@ -103,7 +103,6 @@ class ras:
         fits = pyfits.open(fits_file)
         self.header = fits[0].header
         self.data = fits[1].data
-        self.title = self.header.get('TELESCOP') + ' ' + self.header.get('INSTRUME') + ' ' + self.header.get('DATE_OBS')
         self.temperature = float(self.header.get('TEMPCCD'))
         self.preamp_gain = float(self.header.get('GAIN_PRE'))
         self.analog_gain = float(self.header.get('GAIN_ANA'))
@@ -111,22 +110,23 @@ class ras:
         self.date = get_header_time(self.header)[0]
 
     def __repr__(self):
-        return self.header.get('TELESCOP') + ' ' + self.header.get('INSTRUME') + ' ' + self.header.get('DATE_OBS')
+        return self.header.get('TELESCOP') + ' ' + self.header.get('INSTRUME') + ' ' + self.date.strftime("%Y-%m-%d %H:%M:%S") + ' UT'
+
     
-    def plot(self, log = True, axes=None, **imshow_args):
+    def plot(self, log = False, axes=None, **imshow_args):
         #Get current axes
         if not axes:
             axes = plt.gca()
 
-        axes.set_title(self.title)
+        axes.set_title(self.__repr__())
         axes.set_ylabel('pixels')
         axes.set_xlabel('pixels')
             
         if log:
-            cs = axes.imshow(self.data, cmap=plt.cm.bone, norm = LogNorm())
+            ret = axes.imshow(self.data, cmap=plt.cm.Greys_r, norm = LogNorm())
         else:
-            cs = axes.imshow(self.data, cmap=plt.cm.bone)
-
+            ret = axes.imshow(self.data, cmap=plt.cm.bone)
+        plt.colorbar(ret)
         plt.sci(ret)
         return ret
         
@@ -230,7 +230,7 @@ class pyas:
         self.ctl = np.array([self.header.get('CTL_ELEV'), self.header.get('CTL_AZIM')])
     
     def __repr__(self):
-        return self.header.get('TELESCOP') + ' ' + self.header.get('INSTRUME') + ' ' + self.header.get('DATE_OBS')
+        return self.header.get('TELESCOP') + ' ' + self.header.get('INSTRUME') + ' ' + self.date.strftime("%Y-%m-%d %H:%M:%S UT") + ' UT'
         
     def plot(self, log = True, zoom = False, sky = True, axes=None, **imshow_args):
         """ Plots the pyas object using matplotlib, in a method equivalent
