@@ -37,7 +37,7 @@ nominal_grid_range2_detector0=[5810,5825] ; additional grid voltage range for De
 if keyword_set(PSFILE) then create_ps,file='ps_files/'+psfile,/land
 
 ;read in GSE data
-gse=mrdfits(flt_gse_dir+'/f13_dst.fits',1,hdr)
+gse=mrdfits(flt_gse_dir+'f13_dst.fits',1,hdr)
 
 for cpu = 16, 19 do begin ;Loop over DPS cans 1-4. These are labeled by CPU #16,17,18,19 in the GSE data. Each can controls a pair of detectors
   det0=(cpu-16)*2	  ;first detector in pair
@@ -131,14 +131,15 @@ nmax=max(nintervals)
 tstart_nominal=tstart_nom[0:nmax-1,*]
 tstop_nominal=tstop_nom[0:nmax-1,*]
 
-if keyword_set(outfile) then begin ; write output time intervals to a fits file.
-  output_struct_gti=replicate({tstart:dblarr(8),tstop:dblarr(8)},nmax)
-  for i=0,nmax-1 do begin
+if keyword_set(outfile) then filename = outfile ELSE outfile = 'nominal_detector_voltage_time_intervals.fits'
+
+output_struct_gti=replicate({tstart:dblarr(8),tstop:dblarr(8)},nmax)
+for i=0,nmax-1 do begin
     output_struct_gti[i].tstart=transpose(tstart_nominal[i,*])
     output_struct_gti[i].tstop=transpose(tstop_nominal[i,*])
-  endfor  
-  mwrfits,output_struct_gti,'fits_files/'+outfile
-endif    
+    endfor  
+mwrfits,output_struct_gti,'fits_files/'+outfile
+
 end   							       
 													      
   

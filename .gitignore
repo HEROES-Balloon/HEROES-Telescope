@@ -57,3 +57,8 @@ my_directories.pro
 
 # Data files
 *.csv
+
+#Directories
+fits_files
+idl_savesets
+ps_files

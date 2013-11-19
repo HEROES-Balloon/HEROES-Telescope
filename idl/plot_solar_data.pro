@@ -18,14 +18,14 @@ image_tstop=dblarr(8)
 
 ;loop over detectors
 for det=0,7 do begin
-  detstr=string(det,'(i1)')
+    detstr=string(det,'(i1)')
 
-;read in fits data files - note this routine can be downloaded from http://idlastro.gsfc.nasa.gov as part of the IDL Astronomy Users library
-  h=mrdfits(gc_flt_data+'/det0'+detstr+'s_gc.fits',1,hdr)
+    ;read in fits data files - note this routine can be downloaded from http://idlastro.gsfc.nasa.gov as part of the IDL Astronomy Users library
+    h=mrdfits(gc_flt_data+'det0'+detstr+'s_gc.fits',1,hdr)
   
-;select data when HEROES is observing the Sun, gain corrected event energy is 20-75 keV, and 
-;detector position is within 158.8 pixels (9 arcmin) of RAWX=300, RAWY=300.  
-  w=where(((h.time ge obs_start and h.time le obs_end) and $
+    ;select data when HEROES is observing the Sun, gain corrected event energy is 20-75 keV, and 
+    ;detector position is within 158.8 pixels (9 arcmin) of RAWX=300, RAWY=300.  
+    w=where(((h.time ge obs_start and h.time le obs_end) and $
           (h.energy ge 20. and h.energy le 75.)) and $
 	  (sqrt((h.rawx-300)^2+(h.rawy-300)^2) le 158.8),nw)  
 	  
@@ -47,11 +47,11 @@ ttls='Solar Observation 7 hours'
 !p.multi=[0,3,3]
 for det=0,7 do begin
     if det eq 0 then ttl=ttls else ttl= ' '   
-  cgimage,images[*,*,det,obs],$
+  cgimage,images[*,*,det],$
   /axes,color=0,axkeywords={xticklen:-0.02,yticklen:-0.02,xtitle:'RAWX',ytitle:'RAWY'},/fit_inside,$
   /keep_aspect,xrange=[0,600],yrange=[0,600],background=254,title=ttl
   endfor
-endfor  
+;endfor  
 ;close postscript file (local routine)
 close_ps
 end    

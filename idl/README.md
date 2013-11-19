@@ -18,7 +18,7 @@ Copy the sample_my_directories file and edit it to the locations of your files.
 
 Before going on to making images make sure to run the following command
 
-    @run my_directories
+    @my_directories
 
 to load the variables.
 

@@ -1,8 +1,12 @@
 ;This code fits lines and energy resolution for sources illuminating the central region of a HEROES detector to determine gain corrections vs ;energy.
 
+;needs to include definition for  herocal_path - path to HEROES\ Calibrations\ 2013
+@my_directories.pro.incl
+
 ;input file - a text file including event file names (produced by evt2fits with single events selected using fselect) (column 1) and radioactive ;source names: Am, Tb, Ba, Ag, Mo, Rb
-file_src_list= ' '
-read,'Enter name of file containing list of on-axis event files and corresponding radioactive sources: ',file_src_list
+read,'Enter detector number: ',det
+tmpfiles=file_search('txt_files/det'+string(det,'(i1)')+'_onaxis*',count=cnt)
+file_src_list=tmpfiles[0]
 readcol,file_src_list,onaxis_files,src,format='a,a',delimiter=','
 cnt=n_elements(onaxis_files)
 
@@ -52,7 +56,7 @@ ask,'Show line fits? 0=no, 1=yes ',show_line_fits
 
 for i=0,cnt-1 do begin
 ;read in event file for line fitting 
-  h=mrdfits(onaxis_files[i],1,hdr)
+  h=mrdfits(herocal_path+'/'+onaxis_files[i],1,hdr)
   detstr=string(sxpar(hdr,'DETECTOR'),'(i1)')
   print,'Data file is for detector ',sxpar(hdr,'DETECTOR')
 ;read in Am scan results for spatial gain corrections  
@@ -106,7 +110,7 @@ for i=0,nsrc-1 do begin
     if show_line_fits eq 1 then begin 
       plot,energy_pi,spectra[*,i],psym=10,xtitle='Energy (keV)',ytitle='# of events', title=src[s[unq[i]]]+' '+onaxis_files[i]
       oplot,energy_pi[good],model,color=5
-      print,'hit any key' & rr=get_kbrd(1) & stop
+      print,'hit any key' & rr=get_kbrd(1) 
     endif  
   end   
   'Mo': begin
@@ -131,7 +135,7 @@ for i=0,nsrc-1 do begin
     if show_line_fits eq 1 then begin 
       plot,energy_pi,spectra[*,i],psym=10,xtitle='Energy (keV)',ytitle='# of events', title=src[s[unq[i]]]+' '+onaxis_files[i]
       oplot,energy_pi[good],model,color=5
-      print,'hit any key' & rr=get_kbrd(1) & stop
+      print,'hit any key' & rr=get_kbrd(1) 
     endif  
   end        
   'Ag': begin
@@ -156,7 +160,7 @@ for i=0,nsrc-1 do begin
     if show_line_fits eq 1 then begin 
       plot,energy_pi,spectra[*,i],psym=10,xtitle='Energy (keV)',ytitle='# of events', title=src[s[unq[i]]]+' '+onaxis_files[i]
       oplot,energy_pi[good],model,color=5
-      print,'hit any key' & rr=get_kbrd(1) & stop
+      print,'hit any key' & rr=get_kbrd(1) 
     endif  
   end        
   'Ba': begin  ;Fit the Ba lines plus the Xenon K-alpha and K-beta escape peaks.
@@ -214,7 +218,7 @@ for i=0,nsrc-1 do begin
       plot,energy_pi,spectra[*,i],psym=10,xtitle='Energy (keV)',ytitle='# of events', title=src[s[unq[i]]]+' '+onaxis_files[i]
       oplot,energy_pi[good1],model,color=5
       oplot,energy_pi[good2],model2,color=5
-      print,'hit any key' & rr=get_kbrd(1) & stop
+      print,'hit any key' & rr=get_kbrd(1) 
     endif  
    end   
   'Tb': begin ;Fit the Tb lines plus the Xenon K-alpha and K-beta escape peaks.
@@ -269,7 +273,7 @@ for i=0,nsrc-1 do begin
       plot,energy_pi,spectra[*,i],psym=10,xtitle='Energy (keV)',ytitle='# of events', title=src[s[unq[i]]]+' '+onaxis_files[i]
       oplot,energy_pi[good1],model1,color=5
       oplot,energy_pi[good2],model2,color=5
-      print,'hit any key' & rr=get_kbrd(1) & stop
+      print,'hit any key' & rr=get_kbrd(1) 
     endif  
   end   
   'Am': begin ;fit Am line and Xenon escape peaks simultaneously
@@ -308,7 +312,7 @@ for i=0,nsrc-1 do begin
     if show_line_fits eq 1 then begin 
       plot,energy_pi,spectra[*,i],psym=10,xtitle='Energy energy_pinel',ytitle='# of events', title=src[s[unq[i]]]+' '+onaxis_files[i]
       oplot,energy_pi[good],model,color=5
-      print,'hit any key' & rr=get_kbrd(1) & stop
+      print,'hit any key' & rr=get_kbrd(1)
     endif  
   end  
   endcase
@@ -341,7 +345,7 @@ ploterror,onaxis_energies,onaxis_line_centers,onaxis_line_center_errs,psym=4,xti
  ytitle='Line center (channel)'
 fit_poly,onaxis_energies,onaxis_line_centers,onaxis_line_center_errs,1,pcoef,pyf,pcv
 oplot,onaxis_energies,pyf
-print,'hit any key' & rr=get_kbrd(1) & stop
+print,'hit any key' & rr=get_kbrd(1) 
 pchisq=total((onaxis_line_centers-pyf)^2/onaxis_line_center_errs^2)
 pdof=n_elements(pyf)-n_elements(pcoef)
 gain=1/pcoef[1]/10.

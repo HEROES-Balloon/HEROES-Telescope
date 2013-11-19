@@ -1,0 +1,14 @@
+HEROES Calibrations 2013/Detector 5 PMT 1095V/On-axis large pinhole_25Jul2013/Det5_HSCI-20130725-152735_s.evt, Rb
+HEROES Calibrations 2013/Detector 5 PMT 1095V/On-axis large pinhole_25Jul2013/Det5_HSCI-20130725-153002_s.evt, Rb
+HEROES Calibrations 2013/Detector 5 PMT 1095V/On-axis large pinhole_25Jul2013/Det5_HSCI-20130725-153311_s.evt, Mo
+HEROES Calibrations 2013/Detector 5 PMT 1095V/On-axis large pinhole_25Jul2013/Det5_HSCI-20130725-153544_s.evt, Mo
+HEROES Calibrations 2013/Detector 5 PMT 1095V/On-axis large pinhole_25Jul2013/Det5_HSCI-20130725-153845_s.evt, Ag
+HEROES Calibrations 2013/Detector 5 PMT 1095V/On-axis large pinhole_25Jul2013/Det5_HSCI-20130725-154111_s.evt, Ag
+HEROES Calibrations 2013/Detector 5 PMT 1095V/On-axis large pinhole_25Jul2013/Det5_HSCI-20130725-154337_s.evt, Ag
+HEROES Calibrations 2013/Detector 5 PMT 1095V/On-axis large pinhole_25Jul2013/Det5_HSCI-20130725-154608_s.evt, Ag
+HEROES Calibrations 2013/Detector 5 PMT 1095V/On-axis large pinhole_25Jul2013/Det5_HSCI-20130725-155105_s.evt, Ba
+HEROES Calibrations 2013/Detector 5 PMT 1095V/On-axis large pinhole_25Jul2013/Det5_HSCI-20130725-155342_s.evt, Ba
+HEROES Calibrations 2013/Detector 5 PMT 1095V/On-axis large pinhole_25Jul2013/Det5_HSCI-20130725-155707_s.evt, Tb
+HEROES Calibrations 2013/Detector 5 PMT 1095V/On-axis large pinhole_25Jul2013/Det5_HSCI-20130725-155933_s.evt, Tb
+HEROES Calibrations 2013/Detector 5 PMT 1095V/On-axis large pinhole_25Jul2013/Det5_HSCI-20130725-160342_s.evt, Am
+HEROES Calibrations 2013/Detector 5 PMT 1095V/On-axis large pinhole_25Jul2013/Det5_HSCI-20130725-160607_s.evt, Am

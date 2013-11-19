@@ -14,6 +14,7 @@ onaxis=mrdfits(onaxis_gain_file,1,onaxis_hdr)
 
 ;read in file to correct
 h=mrdfits(filename,1,hdr)
+print, file_search(filename)
 event_pi=fltarr(n_elements(h))
 for i=0,n_elements(h)-1 do begin
   dist=sqrt((h[i].rawx-amscan.peak_xcoord[xf])^2+(h[i].rawy-amscan.peak_ycoord[xf])^2) ;find the nearest point in the Am scan

@@ -22,17 +22,21 @@ show_line_fits=0
 ask,'Show line fits 1=yes ',show_line_fits
 
 ;get files to read
-file=findfile(flt_datadir+'/det0'+detstr+'*s.fits',count=cnt)
+file=findfile(flt_datadir+'det0'+detstr+'*s.fits',count=cnt)
 if cnt eq 0 then stop,file+' not found.'
-
 
 ;Define gain correction files
 amscan_gain_file='fits_files/Det'+detstr+'_amscan_line_fit_results.fits'
 onaxis_gain_file=findfile('fits_files/Det'+detstr+'_onaxis_line_fit_and_resolution*.fits',count=oncnt)
 if oncnt gt 1 then onaxis_gain_file=onaxis_gain_file[oncnt-1] ; pick the latest file
-
+f = file_search(file)
+print, f
+f = file_search(amscan_gain_file)
+print, f
+f = file_search(onaxis_gain_file)
+print, f
 ;apply gain corrections from Am scans and onaxis measurements
-apply_gain_energy_corrections,file,amscan_gain_file,onaxis_gain_file,outstr
+apply_gain_energy_corrections,file[0],amscan_gain_file[0],onaxis_gain_file[0],outstr
 
 ;Define and read nominal voltage time interval file
 nominal_voltage_time_intervals_file='fits_files/nominal_detector_voltage_time_intervals.fits'
