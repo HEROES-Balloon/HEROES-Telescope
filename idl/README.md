@@ -60,7 +60,7 @@ Basic steps to make a HEROES image
 	
 	`IDL> .run make_gain_corrected_flight_files.pro`
 
-This code applies all of the gain corrections in steps 1-3 to the flight data and outputs new gain corrected data files tot the subdirectory gc_flt_data
+	This code applies all of the gain corrections in steps 1-3 to the flight data and outputs new gain corrected data files tot the subdirectory gc_flt_data
 
 	`gc_flt_data/det0<det#>s_gc.fits`
 
