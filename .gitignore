@@ -48,3 +48,10 @@ Icon
 # Files that might appear on external disk
 .Spotlight-V100
 .Trashes
+
+#Directories
+fits_files
+idl_savesets
+ps_files
+
+

@@ -1,0 +1,12 @@
+HEROES Calibrations 2013/Detector 4 New PMT 1015V Grid 5300V Revised/On-axis large pinhole 24Jul2013/Det4_HSCI-20130724-185254_s.evt, Rb
+HEROES Calibrations 2013/Detector 4 New PMT 1015V Grid 5300V Revised/On-axis large pinhole 24Jul2013/Det4_HSCI-20130724-185523_s.evt, Rb
+HEROES Calibrations 2013/Detector 4 New PMT 1015V Grid 5300V Revised/On-axis large pinhole 24Jul2013/Det4_HSCI-20130724-185844_s.evt, Mo
+HEROES Calibrations 2013/Detector 4 New PMT 1015V Grid 5300V Revised/On-axis large pinhole 24Jul2013/Det4_HSCI-20130724-190110_s.evt, Mo 
+HEROES Calibrations 2013/Detector 4 New PMT 1015V Grid 5300V Revised/On-axis large pinhole 24Jul2013/Det4_HSCI-20130724-190623_s.evt, Ag
+HEROES Calibrations 2013/Detector 4 New PMT 1015V Grid 5300V Revised/On-axis large pinhole 24Jul2013/Det4_HSCI-20130724-190904_s.evt, Ag
+HEROES Calibrations 2013/Detector 4 New PMT 1015V Grid 5300V Revised/On-axis large pinhole 24Jul2013/Det4_HSCI-20130724-191429_s.evt, Ba
+HEROES Calibrations 2013/Detector 4 New PMT 1015V Grid 5300V Revised/On-axis large pinhole 24Jul2013/Det4_HSCI-20130724-191655_s.evt, Ba
+HEROES Calibrations 2013/Detector 4 New PMT 1015V Grid 5300V Revised/On-axis large pinhole 24Jul2013/Det4_HSCI-20130724-192125_s.evt, Tb
+HEROES Calibrations 2013/Detector 4 New PMT 1015V Grid 5300V Revised/On-axis large pinhole 24Jul2013/Det4_HSCI-20130724-192351_s.evt, Tb
+HEROES Calibrations 2013/Detector 4 New PMT 1015V Grid 5300V Revised/On-axis large pinhole 24Jul2013/Det4_HSCI-20130724-192705_s.evt, Am
+HEROES Calibrations 2013/Detector 4 New PMT 1015V Grid 5300V Revised/On-axis large pinhole 24Jul2013/Det4_HSCI-20130724-192939_s.evt, Am

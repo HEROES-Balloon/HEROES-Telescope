@@ -1,0 +1,12 @@
+HEROES Calibrations 2013/Detector 7 PMT 1025V/On-axis large pinhole_31May2013/Det7_HSCI-20130531-161242_s.evt, Tb
+HEROES Calibrations 2013/Detector 7 PMT 1025V/On-axis large pinhole_31May2013/Det7_HSCI-20130531-161730_s.evt, Ba
+HEROES Calibrations 2013/Detector 7 PMT 1025V/On-axis large pinhole_31May2013/Det7_HSCI-20130531-162306_s.evt, Ag
+HEROES Calibrations 2013/Detector 7 PMT 1025V/On-axis large pinhole_31May2013/Det7_HSCI-20130531-162648_s.evt, Mo
+HEROES Calibrations 2013/Detector 7 PMT 1025V/On-axis large pinhole_31May2013/Det7_HSCI-20130531-163007_s.evt, Rb
+HEROES Calibrations 2013/Detector 7 PMT 1025V/On-axis large pinhole_31May2013/Det7_HSCI-20130531-163525_s.evt, Tb
+HEROES Calibrations 2013/Detector 7 PMT 1025V/On-axis large pinhole_31May2013/Det7_HSCI-20130531-164212_s.evt, Ba
+HEROES Calibrations 2013/Detector 7 PMT 1025V/On-axis large pinhole_31May2013/Det7_HSCI-20130531-164540_s.evt, Ag
+HEROES Calibrations 2013/Detector 7 PMT 1025V/On-axis large pinhole_31May2013/Det7_HSCI-20130531-164945_s.evt, Mo
+HEROES Calibrations 2013/Detector 7 PMT 1025V/On-axis large pinhole_31May2013/Det7_HSCI-20130531-165354_s.evt, Rb
+HEROES Calibrations 2013/Detector 7 PMT 1025V/On-axis large pinhole_31May2013/Det7_HSCI-20130531-174610_s.evt, Am
+

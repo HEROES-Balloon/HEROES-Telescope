@@ -1,0 +1,8 @@
+HEROES Calibrations 2013/Detector 2 PMT 850V/On-axis large pinhole 2May2013_after_resintalling_cal_src/Det2_HSCI-20130502-155719_s.evt, Tb
+HEROES Calibrations 2013/Detector 2 PMT 850V/On-axis large pinhole 2May2013_after_resintalling_cal_src/Det2_HSCI-20130502-155945_s.evt, Tb
+HEROES Calibrations 2013/Detector 2 PMT 850V/On-axis large pinhole 2May2013_after_resintalling_cal_src/Det2_HSCI-20130502-160210_s.evt, Tb
+HEROES Calibrations 2013/Detector 2 PMT 850V/On-axis large pinhole 2May2013_after_resintalling_cal_src/Det2_HSCI-20130502-160631_s.evt, Ba
+HEROES Calibrations 2013/Detector 2 PMT 850V/On-axis large pinhole 2May2013_after_resintalling_cal_src/Det2_HSCI-20130502-161045_s.evt, Ag
+HEROES Calibrations 2013/Detector 2 PMT 850V/On-axis large pinhole 2May2013_after_resintalling_cal_src/Det2_HSCI-20130502-161409_s.evt, Mo
+HEROES Calibrations 2013/Detector 2 PMT 850V/On-axis large pinhole 2May2013_after_resintalling_cal_src/Det2_HSCI-20130502-161709_s.evt, Rb
+HEROES Calibrations 2013/Detector 2 PMT 850V/On-axis large pinhole 2May2013_after_resintalling_cal_src/Det2_HSCI-20130502-171438_s.evt, Am

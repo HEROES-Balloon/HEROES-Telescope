@@ -1,0 +1,6 @@
+HEROES Calibrations 2013/Detector 1 PMT 960V/On-axis_large_pinhole_10May2013/Det1_HSCI-20130510-141434_s.evt, Tb
+HEROES Calibrations 2013/Detector 1 PMT 960V/On-axis_large_pinhole_10May2013/Det1_HSCI-20130510-141744_s.evt, Ba
+HEROES Calibrations 2013/Detector 1 PMT 960V/On-axis_large_pinhole_10May2013/Det1_HSCI-20130510-142049_s.evt, Ag
+HEROES Calibrations 2013/Detector 1 PMT 960V/On-axis_large_pinhole_10May2013/Det1_HSCI-20130510-142358_s.evt, Mo
+HEROES Calibrations 2013/Detector 1 PMT 960V/On-axis_large_pinhole_10May2013/Det1_HSCI-20130510-142716_s.evt, Rb
+HEROES Calibrations 2013/Detector 1 PMT 960V/On-axis_large_pinhole_10May2013/Det1_HSCI-20130510-192015_s.evt, Am
