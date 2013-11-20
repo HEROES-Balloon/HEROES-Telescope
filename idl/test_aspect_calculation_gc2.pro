@@ -11,7 +11,7 @@ readcol,'txt_files/HEROES_Detector_centers_from_Mo_scans.txt',detector,raw_xcent
 ; ignore detector center from calibration
 raw_xcenter = replicate(300, 8)
 raw_ycenter = replicate(300, 8)
-stop
+
 ;my_directories.pro.incl needs to include definitions FOR the following directory variables:
 ;gc_flt_data - contains the gain corrected flight science data fits files.
 ;flt_gse_dir - contains the GSE fits files f13_aid.fits and f13_gps.fits from the flight
@@ -196,28 +196,30 @@ titlesazalt=['Xaz=centeraz+dx, Yalt=centeralt+dy', $
 	         
 titlexra='XRA = GMST-longitude-asin(sin(Xaz)*cos(Yalt)/cos(YDEC))'
 titleydec='YDEC = asin(sin(Yalt)*sin(latitude)+cos(Yalt)*cos(latitude)*cos(XAZ))'
+
+; now plot the results
  
-!p.multi=[0,3,3]
+!p.multi=[0, 3, 3]
 titles = 'Detector '+['0','1','2','3','4','5','6','7']
 device,decompose=0
 cgloadct,2
 
-FOR j=1,1 DO BEGIN
-  FOR idet=0,7 DO BEGIN
+FOR j = 1, 1 DO BEGIN
+    FOR idet = 0, 7 DO BEGIN
       cgimage, images[*,*,j,idet] < maxdet, $
       /axes,color=0,axkeywords={xticklen:-0.02,yticklen:-0.02,xtitle:'XRA-TargetRA (arcmin)',ytitle:'YDEC-TargetDec (arcmin)'},/fit_inside,$
       /keep_aspect, xrange=[-17,17], yrange=[-17,17], background=254, title=titles[idet]
-  ENDFOR
-  totimage = total(images[*,*,j,0:7],4)
-  cgimage, totimage<maxtot,$
+    ENDFOR
+    totimage = total(images[*,*,j,0:7],4)
+    cgimage, totimage<maxtot,$
       /axes,color=0,axkeywords={xticklen:-0.02,yticklen:-0.02,xtitle:'XRA-TargetRA (arcmin)',ytitle:'YDEC-TargetDec (arcmin)'},/fit_inside,$
       /keep_aspect,xrange=[-17,17], yrange=[-17,17],background=254,title='Total Det0-7'
-      
-  xyouts,0.,-0.25,outtitle+' T0 = '+string(h[w[0]].time,'(f14.1)'),/norm 
-  xyouts,0,-0.35,titlexra,/norm
-  xyouts,0,-0.4,titleydec,/norm
-  xyouts,0.,-0.45,titlesazalt[j],/norm
-  xyouts,0.,-0.5,'dx=(RAWX-Xcenter)*platescale, dy=(RAWY-Ycenter)*platescale',/norm
+  
+    xyouts,0.,-0.25,outtitle+' T0 = '+string(h[w[0]].time,'(f14.1)'),/norm 
+    xyouts,0,-0.35,titlexra,/norm
+    xyouts,0,-0.4,titleydec,/norm
+    xyouts,0.,-0.45,titlesazalt[j],/norm
+    xyouts,0.,-0.5,'dx=(RAWX-Xcenter)*platescale, dy=(RAWY-Ycenter)*platescale',/norm
 ENDFOR  
       
 if !d.name eq 'PS' then close_ps
