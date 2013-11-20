@@ -13,12 +13,13 @@ The file my_directories.pro stores all of the information related to the locatio
 * flt_datadir - flight data directory
 * flt_gse_dir - flight gse metadata (e.g. temperatures, GPS, voltages, star camera solutions)
 * gc_flt_data - gain corrected flight data
+* ac2_flt_data - where the aspect corrected image files get stored
 
-Copy the sample_my_directories file and edit it to the locations of your files.
+Copy the `sample_my_directories.pro` file and rename it to `my_directories.pro.incl` and edit it to the locations of your files.
 
 Before going on to making images make sure to run the following command
 
-    @my_directories
+    @my_directories.pro.incl
 
 to load the variables.
 

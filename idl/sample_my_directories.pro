@@ -13,3 +13,6 @@ flt_gse_dir='/Users/cwilsonh/HEROES/Allyns_processed_data/GSE_proc/'
 
 ;example gain corrected flight data directory
 gc_flt_data='/Users/cwilsonh/HEROES/gain_corrections/gc_flt_data/'
+
+;where aspect corrected image files go
+ac2_flt_data = 'ac2_flt_data/'
