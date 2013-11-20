@@ -9,9 +9,9 @@
 readcol,'txt_files/HEROES_Detector_centers_from_Mo_scans.txt',detector,raw_xcenter,raw_ycenter
 
 ; ignore detector center from calibration
-raw_xcenter = 300
-raw_ycenter = 300
-
+raw_xcenter = replicate(300, 8)
+raw_ycenter = replicate(300, 8)
+stop
 ;my_directories.pro.incl needs to include definitions FOR the following directory variables:
 ;gc_flt_data - contains the gain corrected flight science data fits files.
 ;flt_gse_dir - contains the GSE fits files f13_aid.fits and f13_gps.fits from the flight
@@ -125,7 +125,6 @@ FOR det = 0,7 DO BEGIN
     mjd = sxpar(hdr,'MJDREF')+h[w].stime/8.64d4-2.d0/8.64d4 ;subtract 2 leap seconds from GPS time to get UTC
     gmst_hrs = (18.697374558d0 + 24.06570982441908*(mjd-51544.5d0)) mod 24. ;from http://aa.usno.navy.mil/faq/DOcs/GAST.php
     lsthrs = (gmst_hrs+longitude*24./360.d0) mod 24 
-
 
     ;check that conversion FOR alt/az to ra/dec matches the star camera solutions
     test_targetdec=asin(sin(targetalt*!dtor*1.d0)*sin(lat*!dtor*1.d0)+cos(targetalt*!dtor*1.d0)*cos(lat*!dtor*1.d0)*cos(targetaz*!dtor*1.d0))*!radeg
