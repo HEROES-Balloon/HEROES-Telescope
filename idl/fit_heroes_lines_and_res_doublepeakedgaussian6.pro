@@ -370,7 +370,7 @@ p4=sigmasq_coef[1] & p4_err=sqrt(sigmasq_cv[1,1]*((schisq/sdof)>1.0))
 print,'Energy resolution coefficients: '
 print,'P3 = ',p3,'+/-',p3_err
 print,'P4 = ',p4,'+/-',p4_err
-ploterror,onaxis_energies,onaxis_line_sigmas,onaxis_line_sigma_errs,psym=4
+ploterror,onaxis_energies,onaxis_line_sigmas,onaxis_line_sigma_errs,psym=4,xtitle='Energy (keV)',ytitle='Line sigma (ke
 ss=sort(onaxis_energies)
 oplot,onaxis_energies[ss],sqrt(sigmasq_yf[ss])
 fitsfile='fits_files/Det'+detstr+$
