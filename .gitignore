@@ -48,3 +48,17 @@ Icon
 # Files that might appear on external disk
 .Spotlight-V100
 .Trashes
+
+# Local settings file
+my_directories.pro
+
+# Plots
+*.pdf
+
+# Data files
+*.csv
+
+#Directories
+fits_files
+idl_savesets
+ps_files

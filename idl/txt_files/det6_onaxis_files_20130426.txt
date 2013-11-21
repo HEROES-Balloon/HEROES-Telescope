@@ -1,0 +1,6 @@
+HEROES Calibrations 2013/Detector 6 PMT 935V/On-axis large pinhole 26Apr2013/Det6_HSCI-20130426-155527_s.evt, Tb
+HEROES Calibrations 2013/Detector 6 PMT 935V/On-axis large pinhole 26Apr2013/Det6_HSCI-20130426-155855_s.evt, Ba
+HEROES Calibrations 2013/Detector 6 PMT 935V/On-axis large pinhole 26Apr2013/Det6_HSCI-20130426-160256_s.evt, Ag
+HEROES Calibrations 2013/Detector 6 PMT 935V/On-axis large pinhole 26Apr2013/Det6_HSCI-20130426-160749_s.evt, Mo
+HEROES Calibrations 2013/Detector 6 PMT 935V/On-axis large pinhole 26Apr2013/Det6_HSCI-20130426-161332_s.evt, Rb
+HEROES Calibrations 2013/Detector 6 PMT 935V/On-axis large pinhole 26Apr2013/Det6_HSCI-20130429-171850_s.evt, Am

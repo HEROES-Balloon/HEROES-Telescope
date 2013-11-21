@@ -230,7 +230,7 @@ class pyas:
         self.ctl = np.array([self.header.get('CTL_ELEV'), self.header.get('CTL_AZIM')])
     
     def __repr__(self):
-        return self.header.get('TELESCOP') + ' ' + self.header.get('INSTRUME') + ' ' + self.date.strftime("%Y-%m-%d %H:%M:%S UT") + ' UT'
+        return self.header.get('TELESCOP') + ' ' + self.header.get('INSTRUME') + ' ' + self.date.strftime("%Y-%m-%d %H:%M:%S") + ' UT'
         
     def plot(self, log = True, zoom = False, sky = True, axes=None, **imshow_args):
         """ Plots the pyas object using matplotlib, in a method equivalent

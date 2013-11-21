@@ -1,4 +1,4 @@
-pro apply_all_flight_gain_corrections,filename,detector, amscan_gain_file,onaxis_gain_file, cd109_gain_file,outstr,$
+pro apply_all_flight_gain_corrections,filename,det, amscan_gain_file,onaxis_gain_file, cd109_gain_file,outstr,$
  NOMINAL_VOLTAGE_TIME_INTERVALS_FILE=nominal_voltage_time_intervals_file, PLOT_SPECTRA=plot_spectra, OUTFILE=outfile
 ;This routine reads in an event file, applies gain corrections from Am scans found in amscan_file and
 ;from on-axis measurements found in gain_file and from the shifts in the Cd109 line during the flight. A new IDL structure is then written that adds one field - 

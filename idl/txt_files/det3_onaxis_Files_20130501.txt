@@ -1,0 +1,6 @@
+HEROES Calibrations 2013/Detector 3 PMT 1040V/On-axis large pinhole_1May2013/Det3_HSCI-20130501-163649_s.evt, Tb
+HEROES Calibrations 2013/Detector 3 PMT 1040V/On-axis large pinhole_1May2013/Det3_HSCI-20130501-164257_s.evt, Ba
+HEROES Calibrations 2013/Detector 3 PMT 1040V/On-axis large pinhole_1May2013/Det3_HSCI-20130501-164955_s.evt, Ag
+HEROES Calibrations 2013/Detector 3 PMT 1040V/On-axis large pinhole_1May2013/Det3_HSCI-20130501-165355_s.evt, Mo
+HEROES Calibrations 2013/Detector 3 PMT 1040V/On-axis large pinhole_1May2013/Det3_HSCI-20130501-165719_s.evt, Rb
+HEROES Calibrations 2013/Detector 3 PMT 1040V/On-axis large pinhole_1May2013/Det3_HSCI-20130501-180705_s.evt, Am

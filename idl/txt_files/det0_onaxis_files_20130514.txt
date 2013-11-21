@@ -1,0 +1,8 @@
+HEROES Calibrations 2013/Detector 0 PMT 910V Grid 5300V revised/On-axis_large_pinhole/Det0_HSCI-20130514-172525_s.evt, Tb	
+HEROES Calibrations 2013/Detector 0 PMT 910V Grid 5300V revised/On-axis_large_pinhole/Det0_HSCI-20130514-173025_s.evt, Ba
+HEROES Calibrations 2013/Detector 0 PMT 910V Grid 5300V revised/On-axis_large_pinhole/Det0_HSCI-20130514-173257_s.evt, Ba
+HEROES Calibrations 2013/Detector 0 PMT 910V Grid 5300V revised/On-axis_large_pinhole/Det0_HSCI-20130514-173628_s.evt, Ag
+HEROES Calibrations 2013/Detector 0 PMT 910V Grid 5300V revised/On-axis_large_pinhole/Det0_HSCI-20130514-173917_s.evt, Ag
+HEROES Calibrations 2013/Detector 0 PMT 910V Grid 5300V revised/On-axis_large_pinhole/Det0_HSCI-20130514-174241_s.evt, Mo
+HEROES Calibrations 2013/Detector 0 PMT 910V Grid 5300V revised/On-axis_large_pinhole/Det0_HSCI-20130514-174616_s.evt, Rb
+HEROES Calibrations 2013/Detector 0 PMT 910V Grid 5300V revised/On-axis_large_pinhole/Det0_HSCI-20130514-183004_s.evt, Am
