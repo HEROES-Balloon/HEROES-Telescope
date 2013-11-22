@@ -14,11 +14,11 @@ test_ycenter[2]=250.
 test_xcenter[3]=330.
 test_ycenter[3]=300.
 test_xcenter[4]=280
-test_ycenter[4]=280 ;285.
+test_ycenter[4]=280 
 test_xcenter[5]=305.
-test_ycenter[5]=280. ;270
+test_ycenter[5]=280.
 test_xcenter[6]=280.
-test_ycenter[6]=290. ;280
+test_ycenter[6]=290.
 test_xcenter[7]=330.
 test_ycenter[7]=290
 ;Allyn Tennant's centers from Doug Swartz's e-mail to Colleen on Nov 20, 2013
@@ -50,6 +50,7 @@ for i=0,7 do begin
   endif else begin
     onaxis_files[i]=filedir_sep14+'Detector'+detstr+'/Det0'+detstr+'*_s.evt'
   endelse
+;image creation, image plotting, and color tables are handled in make_heroes_image
   make_heroes_image,onaxis_files[i],image,/plotit,binsize=3
   plots,circle(test_xcenter[i],test_ycenter[i],88.2),color=100
   plots,circle(test_xcenter[i],test_ycenter[i],159.),color=100
@@ -58,7 +59,7 @@ for i=0,7 do begin
   plots,circle(at_xcenter[i],at_ycenter[i],159.),color=200
   plots,at_xcenter[i],at_ycenter[i],psym=1,color=200
 endfor
-;invisible plot to make the legend land in the desired place.
+;invisible plot as a kludge to make the legend land in the desired place.
 plot,indgen(10),color=254
 legend,['Colleens by eye','Allyns fits'],psym=[0,0],color=[100,200],textcolor=0
 
