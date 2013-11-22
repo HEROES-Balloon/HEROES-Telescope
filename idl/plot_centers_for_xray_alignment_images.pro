@@ -1,6 +1,7 @@
 @my_directories.pro.incl
 filedir_sep10=herocal_path+'HEROES_20130910_X-ray_alignment_repeat2/'
 filedir_sep14=herocal_path+'HEROES_20130914_X-ray_alignment_repeat2/'
+;Colleens estimated centers by eye
 onaxis_files=strarr(8)
 test_xcenter=fltarr(8)+300.
 test_ycenter=fltarr(8)+300.
@@ -20,7 +21,7 @@ test_xcenter[6]=280.
 test_ycenter[6]=290. ;280
 test_xcenter[7]=330.
 test_ycenter[7]=290
-
+;Allyn Tennant's centers from Doug Swartz's e-mail to Colleen on Nov 20, 2013
 at_xcenter=fltarr(8)+300.
 at_ycenter=fltarr(8)+300.
 at_xcenter[0]=319.6
@@ -57,6 +58,7 @@ for i=0,7 do begin
   plots,circle(at_xcenter[i],at_ycenter[i],159.),color=200
   plots,at_xcenter[i],at_ycenter[i],psym=1,color=200
 endfor
+;invisible plot to make the legend land in the desired place.
 plot,indgen(10),color=254
 legend,['Colleens by eye','Allyns fits'],psym=[0,0],color=[100,200],textcolor=0
 
