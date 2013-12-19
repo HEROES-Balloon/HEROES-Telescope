@@ -62,6 +62,7 @@ my_directories.pro
 fits_files
 idl_savesets
 ps_files
+db
 
 #user specific file for running IDL codes
 my_directories.pro.incl
