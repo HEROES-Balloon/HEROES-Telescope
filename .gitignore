@@ -62,6 +62,8 @@ my_directories.pro
 fits_files
 idl_savesets
 ps_files
+ac2_flt_data
+gc_flt_data
 db
 
 #user specific file for running IDL codes

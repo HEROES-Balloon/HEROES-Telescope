@@ -30,7 +30,6 @@ Basic steps to make a HEROES image
 
 2. Fit the lines for the Am scans for each position in each detector
 
-    
     `IDL> .run fit_amscan_lines5`    
 	
 	It writes a fits file for each detector in the fits_files subdirectory 
