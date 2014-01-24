@@ -6,12 +6,17 @@ res = read_ascii(file, template = temp)
 
 dim = n_elements(res.field1)
 
-aspect = create_struct('time', '', 'x', 0.0, 'y', '0.0')
+aspect = create_struct('time', 0.0d, 'x', 0.0, 'y', 0.0)
 aspect = replicate(aspect, dim)
 
 aspect.time = anytim(res.field1)
 aspect.x = res.field7
 aspect.y = res.field8
+
+s = sort(aspect.time)
+aspect.time = aspect[s].time
+aspect.x = aspect[s].x
+aspect.y = aspect[s].y
 
 RETURN, aspect
 
