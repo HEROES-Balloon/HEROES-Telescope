@@ -1,10 +1,10 @@
-FUNCTION sas_get_aspect, time, aspect = sas_aspect
+FUNCTION sas_get_aspect, time, sas_aspect = sas_aspect
 
 ;returns aspect info for a particular time
 
 default, time_window_min, 2/60.0
-con1 = sas_aspect.time GE (anytim(time) - 60 * time_window_min/2.0)
-con2 = sas_aspect.time LE (anytim(time) + 60 * time_window_min/2.0)
+con1 = anytim(sas_aspect.time) GE (anytim(time) - 60 * time_window_min/2.0)
+con2 = anytim(sas_aspect.time) LE (anytim(time) + 60 * time_window_min/2.0)
 
 index = where(con1 AND con2, count)
 

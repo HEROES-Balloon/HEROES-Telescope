@@ -7,6 +7,8 @@
 obs_start = convert_anytim_to_heroestime(time_solarobs[0])
 obs_end = convert_anytim_to_heroestime(time_solarobs[1])
 
+sas_aspect = load_aspect()
+
 device,decompose=0 ;IDL command that makes colors work right on my mac.
 
 ;define arrays
