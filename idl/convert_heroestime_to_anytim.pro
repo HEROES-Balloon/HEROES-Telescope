@@ -1,6 +1,6 @@
 FUNCTION convert_heroestime_to_anytim, time
 
-;NAME: convert_anytim_to_heroestime
+;NAME: convert_heroestime_to_anytim
 ;
 ;PURPOSE: Converts from an anytim compatible time to detector time
 
