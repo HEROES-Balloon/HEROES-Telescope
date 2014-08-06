@@ -4,7 +4,7 @@ if n_tags(h) ge 6 then echan=mrdfits(rmffile,2,hdr2) else begin
   echan=h
   h=mrdfits(rmffile,2,hdr)
 endelse  
-matrix=fltarr(1024,1000)
+matrix=fltarr(n_elements(echan),n_elements(h))
 for i=0,n_elements(h)-1 do begin
   for j=0,h[i].n_grp-1 do begin
     if j eq 0 then $
@@ -12,7 +12,7 @@ for i=0,n_elements(h)-1 do begin
        h[i].matrix[0:h[i].n_chan[j]-1] $
     else $
       matrix[h[i].f_chan[j]-1:h[i].f_chan[j]-1+h[i].n_chan[j]-1,i]=$
-       h[i].matrix[h[i].n_chan[j-1]:h[i].n_chan[j-1]+h[i].n_chan[j]-1]
+       h[i].matrix[total(h[i].n_chan[0:j-1]):total(h[i].n_chan[0:j-1])+h[i].n_chan[j]-1]
   endfor     
 endfor
 echan_mid=(echan.e_min+echan.e_max)/2.
