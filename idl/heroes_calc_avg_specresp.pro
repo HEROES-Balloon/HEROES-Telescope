@@ -1,10 +1,12 @@
-FUNCTION heroes_calc_avg_specresp, timerange, PLOT=plot, n = n
+FUNCTION heroes_calc_avg_specresp, offaxis_angle, timerange, PLOT=plot, n = n
 
+;after some experimentation 200 is the about 10% close to real spectral response
 default, n, 200
 
 @my_directories.pro.incl
 
 default, timerange, time_solarobs
+default, offaxis_angle, 0
 
 height = heroes_get_height()
 alt = heroes_get_target_alt()
@@ -16,8 +18,6 @@ times = dindgen(n) * dt + anytim(timerange[0])
 
 these_heights = interpol(height[1,*], height[0,*], times)
 these_alts = interpol(alt[1,*], alt[0,*], times)
-
-offaxis_angle = 0
 
 make_arf2, 13, offaxis_angle, these_heights[0], these_alts[0], result = result, /summed_eff_area, /no_save
 
@@ -31,10 +31,10 @@ ENDFOR
 
 IF keyword_set(PLOT) THEN BEGIN
     make_arf2, 13, offaxis_angle, these_heights[0], these_alts[0], result = result, /summed_eff_area, /no_save
-    plot, result.energy_mid, result.specresp
+    plot, result.energy_mid, result.specresp, xtitle='Energy [keV]', ytitle='Spectral Response [cm!U2!N]'
     oplot, result.energy_mid, spec_resp
 ENDIF
 
-RETURN, spec_resp
+RETURN, [transpose(result.energy_mid), transpose(spec_resp)]
 
 END

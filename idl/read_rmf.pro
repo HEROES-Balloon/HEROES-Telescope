@@ -21,12 +21,15 @@ echan_mid=(echan.e_min + echan.e_max) / 2.
 energ_mid=(h.energ_lo + h.energ_hi) / 2.
 
 IF keyword_set(plot_contour) then begin
-    LoadCT, 33
+    loadct, 0
+    hsi_linecolors
     contour, alog10(matrix), echan_mid, energ_mid, xtitle = 'Channels', $
-        ytitle = 'Energy [keV]', title = 'HEROES Response', /fill, nlevels = 100, $
-        Background=cgColor('white'), Color=cgColor('black')
-    contour, alog10(matrix), echan_mid, energ_mid, nlevels = 10, /overplot, Color=cgColor('black')
-    
+        ytitle = 'Energy [keV]', title = 'HEROES Response', nlevels = 100, /nodata
+    contour, alog10(matrix), echan_mid, energ_mid, nlevels = 10, /overplot
+LoadCT, 33
+    contour, alog10(matrix), echan_mid, energ_mid, nlevels = 10, /fill, /overplot
+    colorbar, n = max(matrix)
+    loadct, 0
 ENDIF
 
 END
