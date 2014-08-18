@@ -8,10 +8,12 @@ from scipy import stats
 sns.set_color_palette("deep", desat=.6)
 sns.set_axes_style("whitegrid", "talk")
 
+bbox_props = dict(boxstyle="round", fc="w", ec="0.5", alpha=0.9)
+
 import heroespy
 from heroespy.util import times
 
-file = "/Users/schriste/Dropbox/Developer/HEROES/HEROES-Telescope/SAS1_pointing_data.csv"
+file = heroespy.__path__[0] + '/db/SAS1_pointing_data.csv'
 
 data = pandas.read_csv(file, parse_dates=True, index_col = 0)
 
@@ -33,11 +35,12 @@ plt.savefig('PYASF_el_timeseries.pdf')
 vals = ctl_el.describe()
 
 plt.figure()
-ax = sns.distplot(ctl_el, bins=100, kde=False, fit=stats.norm, legend = False)
+ax = sns.distplot(ctl_el, bins=100, kde=True, legend = True)
 ax.set_xbound(-100,100)
-plt.annotate( str(ctl_el.describe())[22:-15], xy=(25, 0.02))
+desc = str(ctl_el.describe())[22:-15] + '\nskew         ' + str(stats.skew(ctl_el))[0:8]
+ax.text(65, 0.02, desc, size=15, ha="center", va="center", bbox=bbox_props)
 ax.set_title('HEROES/SAS PYAS-F')
-ax.set_xlabel('Elevation Offset [arcsec]')    
+ax.set_xlabel('Elevation Offset [arcsec]')   
 plt.savefig('PYASF_el_histogram.pdf')
 
 # in arcseconds
@@ -54,11 +57,35 @@ plt.savefig('PYASF_az_timeseries.pdf')
 vals = ctl_az.describe()
 
 plt.figure()
-ax = sns.distplot(ctl_az, bins=100, kde=False, fit=stats.norm, legend = False)
-plt.annotate( str(ctl_az.describe())[22:-15], xy=(110, 0.006))
+ax = sns.distplot(ctl_az, bins=100, kde=True, legend = True)
+desc = str(ctl_az.describe())[22:-15] + '\nskew         ' + str(stats.skew(ctl_az))[0:8]
+ax.text(190, 0.006, desc, size=15, ha="center", va="center", bbox=bbox_props)
 ax.set_title('HEROES/SAS PYAS-F')
 ax.set_xbound(-300,300)
 ax.set_xlabel('Azimuth Offset [arcsec]')    
 plt.savefig('PYASF_az_histogram.pdf')
 
-ctl_el + ctl_az
+values, el_base = np.histogram(np.sqrt(np.power(ctl_el,2)), bins=100)
+ctl_el_cum = np.cumsum(values)
+
+values, az_base = np.histogram(np.sqrt(np.power(ctl_az,2)), bins=100)
+ctl_az_cum = np.cumsum(values)
+
+ctl_r = sas1_obs['offset r']
+
+values, ctl_base = np.histogram(np.sqrt(np.power(ctl_r,2)), bins=100)
+ctl_cum = np.cumsum(values)
+
+fig = plt.figure()
+ax = fig.add_subplot(111)
+ax.plot(el_base[:-1], ctl_el_cum/float(len(ctl_el))*100.0, label = 'Elevation')
+ax.plot(az_base[:-1], ctl_az_cum/float(len(ctl_az))*100.0, label = 'Azimuth')
+ax.plot(ctl_base[:-1], ctl_cum/float(len(ctl_r))*100.0, label = 'To target')
+ax.set_xbound(0,100)
+ax.set_title('HEROES/SAS PYAS-F')
+ax.set_xlabel('Cumulative Offset [arcsec]')
+ax.set_ylabel('Percent')
+ax.yaxis.set_ticks(np.arange(0, 110, 10))
+ax.xaxis.set_ticks(np.arange(0, 110, 10))
+ax.legend(loc='lower right')
+plt.savefig('PYASF_cumulative_dist.pdf')

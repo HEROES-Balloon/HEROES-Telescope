@@ -22,6 +22,21 @@ sas1_sync_word = '0xeb90'
 sas2_sync_word = '0xf626'
 
 class TMFrame:
+"""
+EXAMPLE
+-------
+filename = '/Volumes/SAS_BACKUP1/SAS-1/130921_09/log_tm_130921_093437.bin'
+file = open(filename)
+
+frames = parse_tm_file(file)
+stream = TMStream(frames)
+
+lc = stream.temperatures()
+fig = plt.figure()
+for i in np.arange(7):
+    lc[i].plot()
+plt.show()
+"""
     def __init__(self, data):
         self.data = data
         self.time = None

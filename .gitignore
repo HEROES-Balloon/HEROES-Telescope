@@ -62,8 +62,28 @@ my_directories.pro
 fits_files
 idl_savesets
 ps_files
+ac2_flt_data
+gc_flt_data
+db
 
 #user specific file for running IDL codes
 my_directories.pro.incl
+
+
+### https://raw.github.com/github/gitignore/master/Global/OSX.gitignore
+
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Icon must ends with two \r.
+Icon
+
+# Thumbnails
+._*
+
+# Files that might appear on external disk
+.Spotlight-V100
+.Trashes
 
 
